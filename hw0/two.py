@@ -13,4 +13,4 @@ for i in range(0,a.shape[0]):
         else:
             c[i][j]=b[i][j]
 im = Image.fromarray(np.uint8(c))
-im.save('ans.png')
+im.save('ans_two.png')
