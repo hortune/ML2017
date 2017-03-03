@@ -32,7 +32,7 @@ y=np.array([ i[9][9] for i in data])
 #x=np.array([ i[9][0:9] for i in data])
 data=np.delete(data,np.s_[9:],2)
 x=np.array([ np.ravel(i) for i in data])
-k=Regression(1e-11,200000).fit(x,y)
+k=Regression(1e-9,200000).fit(x,y)
 total_data=240
 total_true=0
 
@@ -53,5 +53,5 @@ print (total_true/240.)
 with open('submission.csv',"w+") as fd:
     print("id,value",file=fd) 
     for i in range(0,240):
-        print("id_"+str(i)+","+str(int(k.activation(x[i]))),file=fd)
+        print("id_"+str(i)+","+str(int(k.activation(qq[i]))),file=fd)
 #try int and round
