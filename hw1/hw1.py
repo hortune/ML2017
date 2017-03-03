@@ -1,4 +1,5 @@
 # coding: utf-8
+# TODO SGD or Momentum
 import numpy as np
 from numpy import *
 import math
@@ -17,11 +18,11 @@ class Regression(object):
             self.w_[0]+=self.eta*errors.sum()
             #print (np.sum(errors**2))
             cost=np.sum(errors**2)
-            print (cost)
         print (cost)
         return self
     def activation(self,x):
         return np.dot(x,self.w_[1:])+self.w_[0]
+
 def load_training_data(filename):
     data=genfromtxt(filename,delimiter=',')
     for i in range(0,data.shape[0]):
@@ -46,7 +47,8 @@ def load_testing_data(filename):
     return np.array([ np.ravel(i) for i in data])
 x,y= load_training_data('train.csv')
 test_data=load_testing_data('test_X.csv')
-k=Regression(2.00006*1e-8,200000).fit(x,y)
+k=Regression(2.00506*1e-8,200000).fit(x,y)
+#k=Regression(1e-8,200000).fit(x,y)
 total_data=240
 total_true=0
 for (a,b) in zip (x,y):
