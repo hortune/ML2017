@@ -9,11 +9,16 @@ class Regression(object):
         self.n_iter = n_iter
     def fit(self,x,y):
         self.w_ = np.zeros(1 + 18*9) # make bias the zero one
+        cost=1
         for i in range(0,self.n_iter):
             output = np.dot(x,self.w_[1:])+self.w_[0]
             errors = y- output 
             self.w_[1:]+=self.eta*x.T.dot(errors)
             self.w_[0]+=self.eta*errors.sum()
+            #print (np.sum(errors**2))
+            cost=np.sum(errors**2)
+            print (cost)
+        print (cost)
         return self
     def activation(self,x):
         return np.dot(x,self.w_[1:])+self.w_[0]
@@ -32,7 +37,16 @@ y=np.array([ i[9][9] for i in data])
 #x=np.array([ i[9][0:9] for i in data])
 data=np.delete(data,np.s_[9:],2)
 x=np.array([ np.ravel(i) for i in data])
-k=Regression(1e-8,200000).fit(x,y)
+"""
+init=2*1e-8
+delta=1e-9
+
+for i in range(0,50):
+    print("learning rate",init)
+    k=Regression(init,200000).fit(x,y)
+    init=init+delta
+"""
+k=Regression(2.00006*1e-8,200000).fit(x,y)
 total_data=240
 total_true=0
 
@@ -46,6 +60,7 @@ data=np.delete(data,np.s_[0,2],1)
 data=np.split(data,240)
 qq=np.array([ np.ravel(i) for i in data])
 total_true=0
+
 for (a,b) in zip (x,y):
     if int(k.activation(a)) == b:
         total_true = total_true+1
