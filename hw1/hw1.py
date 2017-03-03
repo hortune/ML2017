@@ -32,7 +32,7 @@ y=np.array([ i[9][9] for i in data])
 #x=np.array([ i[9][0:9] for i in data])
 data=np.delete(data,np.s_[9:],2)
 x=np.array([ np.ravel(i) for i in data])
-k=Regression(1e-9,200000).fit(x,y)
+k=Regression(1e-8,200000).fit(x,y)
 total_data=240
 total_true=0
 
