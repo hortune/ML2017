@@ -22,45 +22,33 @@ class Regression(object):
         return self
     def activation(self,x):
         return np.dot(x,self.w_[1:])+self.w_[0]
-
-data=genfromtxt('train.csv',delimiter=',')
-for i in range(0,data.shape[0]):
-    for j in range(0,data.shape[1]):
-        if math.isnan(data[i][j]):
-            data[i][j]=0
-data=np.delete(np.delete(data,0,0),np.s_[0:3],1)
-data=np.delete(data,np.s_[10:],1)
-data=np.split(data,240)
-
-
-y=np.array([ i[9][9] for i in data])
-#x=np.array([ i[9][0:9] for i in data])
-data=np.delete(data,np.s_[9:],2)
-x=np.array([ np.ravel(i) for i in data])
-"""
-init=2*1e-8
-delta=1e-9
-
-for i in range(0,50):
-    print("learning rate",init)
-    k=Regression(init,200000).fit(x,y)
-    init=init+delta
-"""
+def load_training_data(filename):
+    data=genfromtxt(filename,delimiter=',')
+    for i in range(0,data.shape[0]):
+        for j in range(0,data.shape[1]):
+            if math.isnan(data[i][j]):
+                data[i][j]=0
+    data=np.delete(np.delete(data,0,0),np.s_[0:3],1)
+    data=np.delete(data,np.s_[10:],1)
+    data=np.split(data,240)
+    y=np.array([ i[9][9] for i in data])
+    data=np.delete(data,np.s_[9:],2)
+    x=np.array([ np.ravel(i) for i in data])
+    return (x,y)
+def load_testing_data(filename):
+    data=genfromtxt(filename,delimiter=',')
+    for i in range(0,data.shape[0]):
+        for j in range(0,data.shape[1]):
+            if math.isnan(data[i][j]):
+                data[i][j]=0
+    data=np.delete(data,np.s_[0,2],1)
+    data=np.split(data,240)
+    return np.array([ np.ravel(i) for i in data])
+x,y= load_training_data('train.csv')
+test_data=load_testing_data('test_X.csv')
 k=Regression(2.00006*1e-8,200000).fit(x,y)
 total_data=240
 total_true=0
-
-
-data=genfromtxt('test_X.csv',delimiter=',')
-for i in range(0,data.shape[0]):
-    for j in range(0,data.shape[1]):
-        if math.isnan(data[i][j]):
-            data[i][j]=0
-data=np.delete(data,np.s_[0,2],1)
-data=np.split(data,240)
-qq=np.array([ np.ravel(i) for i in data])
-total_true=0
-
 for (a,b) in zip (x,y):
     if int(k.activation(a)) == b:
         total_true = total_true+1
@@ -68,5 +56,5 @@ print (total_true/240.)
 with open('submission.csv',"w+") as fd:
     print("id,value",file=fd) 
     for i in range(0,240):
-        print("id_"+str(i)+","+str(int(k.activation(qq[i]))),file=fd)
+        print("id_"+str(i)+","+str(int(k.activation(test_data[i]))),file=fd)
 #try int and round
