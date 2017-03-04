@@ -10,7 +10,7 @@ class Regression(object):
         self.eta = eta
         self.n_iter = n_iter
     def fit(self,x,y):
-        self.w_ = np.zeros(1 + 18*9) # make bias the zero one
+        self.w_ = np.zeros(1 + x.shape[1]) # make bias the zero one
         cost=1
         x_mon = np.split(x,12)
         y_mon = np.split(y,12)
@@ -25,7 +25,7 @@ class Regression(object):
     def activation(self,x):
         return np.dot(x,self.w_[1:])+self.w_[0]
     def fit_adagrad(self,x,y):
-        self.w_ = np.zeros(1 + 18*9) # make bias the zero one
+        self.w_ = np.zeros(1 + x.shape[1]) # make bias the zero one
         cost,k,g=1,0,0
         for i in range(0,self.n_iter):
                 output = np.dot(x,self.w_[1:])+self.w_[0]
@@ -39,6 +39,24 @@ class Regression(object):
         print (cost)
         return self
 
+def sample(data):
+    res = []
+    for k in data:
+        d = []
+        for i in range(0,9):
+            d.append(k[9][i])
+        for i in range(4,9):
+            d.append(k[8][i])
+        for i in range(5,9):
+            d.append(k[9][i]**2)
+        for i in range(7,9):
+            d.append(k[8][i]**2)
+        for i in range(6,9):
+            d.append(k[7][i])
+        for i in range(7,9):
+            d.append(k[10][i])
+        res.append(d)
+    return np.array(res)
 def load_training_data(filename):
     data=genfromtxt(filename,delimiter=',')
     for i in range(0,data.shape[0]):
@@ -49,11 +67,11 @@ def load_training_data(filename):
     data=np.delete(data,np.s_[10:],1)
     data=np.split(data,240)
     y=np.array([ i[9][9] for i in data])
-    data=np.delete(data,np.s_[9:],2)
-    #data=np.delete(data,np.s_[11:],1)
-    #data=np.delete(data,np.s_[0:5],1)
-    x=np.array([ np.ravel(i) for i in data])
+    #data=np.delete(data,np.s_[9:],2)
+    #x=np.array([ np.ravel(i) for i in data])
+    x= sample(data)
     return (x,y)
+
 def load_testing_data(filename):
     data=genfromtxt(filename,delimiter=',')
     for i in range(0,data.shape[0]):
@@ -62,12 +80,16 @@ def load_testing_data(filename):
                 data[i][j]=0
     data=np.delete(data,np.s_[0,2],1)
     data=np.split(data,240)
-    #data=np.delete(data,np.s_[11:],1)
-    #data=np.delete(data,np.s_[0:5],1)
-    return np.array([ np.ravel(i) for i in data])
+    #return np.array([ np.ravel(i) for i in data])
+    return sample(data)
 x,y= load_training_data('train.csv')
 test_data=load_testing_data('test_X.csv')
-k=Regression(500,200000).fit_adagrad(x,y)
+delta = 2
+init = 5000
+for i in range(0,50):
+    print ("learning rate",init)
+    k=Regression(init,200000).fit_adagrad(x,y)
+    init/=delta
 total_data=240
 total_true=0
 for (a,b) in zip (x,y):
