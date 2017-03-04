@@ -50,7 +50,7 @@ def sample(data):
     for k in data:
         d = []
         for i in k:
-            for j in range(0,9):
+            for j in range(5,9):
                 d.append(i[j])
         res.append(d)
     return np.array(res)
@@ -98,7 +98,7 @@ def load_testing_data(filename):
 
 x,y= load_training_data('train.csv')
 test_data=load_testing_data('test_X.csv')
-delta = 2,500
+delta,init = 2,500
 for i in range(0,50):
     print ("learning rate",init)
     k=Regression(init,10000).fit_adagrad(x[0:4512],y[0:4512])
