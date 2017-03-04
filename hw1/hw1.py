@@ -19,8 +19,8 @@ class Regression(object):
                 errors = y- output
                 self.w_[1:]+=self.eta*x.T.dot(errors)
                 self.w_[0]+=self.eta*errors.sum()
-                cost=np.sum(errors**2)
-        print (cost)
+                loss = errors
+        print ((errors**2).sum())
         return self
     def activation(self,x):
         return np.dot(x,self.w_[1:])+self.w_[0]
@@ -43,18 +43,9 @@ def sample(data):
     res = []
     for k in data:
         d = []
-        for i in range(0,9):
-            d.append(k[9][i])
-        for i in range(4,9):
-            d.append(k[8][i])
-        for i in range(5,9):
-            d.append(k[9][i]**2)
-        for i in range(7,9):
-            d.append(k[8][i]**2)
-        for i in range(6,9):
-            d.append(k[7][i])
-        for i in range(7,9):
-            d.append(k[10][i])
+        for i in k:
+            for j in range(0,9):
+                d.append(i[j])
         res.append(d)
     return np.array(res)
 def load_training_data(filename):
@@ -71,7 +62,6 @@ def load_training_data(filename):
     #x=np.array([ np.ravel(i) for i in data])
     x= sample(data)
     return (x,y)
-
 def load_testing_data(filename):
     data=genfromtxt(filename,delimiter=',')
     for i in range(0,data.shape[0]):
@@ -85,17 +75,17 @@ def load_testing_data(filename):
 x,y= load_training_data('train.csv')
 test_data=load_testing_data('test_X.csv')
 delta = 2
-init = 5000
+init = 500
 for i in range(0,50):
     print ("learning rate",init)
-    k=Regression(init,200000).fit_adagrad(x,y)
+    k=Regression(init,1000000).fit_adagrad(x,y)
+    break
     init/=delta
 total_data=240
 total_true=0
 for (a,b) in zip (x,y):
     if int(k.activation(a)) == b:
         total_true = total_true+1
-print (total_true/240.)
 with open('submission.csv',"w+") as fd:
     print("id,value",file=fd) 
     for i in range(0,240):
