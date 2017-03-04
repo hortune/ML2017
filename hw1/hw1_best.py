@@ -1,6 +1,6 @@
 # coding: utf-8
 # TODO SGD or Momentum
-# 6 8 9 10 11 
+# TODO batch, ADAdelta
 import numpy as np
 from numpy import *
 import math
@@ -101,12 +101,17 @@ if __name__=='__main__':
     condition[10].append(2)
     x,y= load_training_data('train.csv',condition)
     test_data=load_testing_data('test_X.csv',condition)
+    """
     delta,init = 2,500
     for i in range(0,50):
         print ("learning rate",init)
         k=Regression(init,50000).fit_adagrad(x[0:4512],y[0:4512])
         init/=delta
         print("rmse",k.validate(x[4512:],y[4512:]))
+    """    
+    k=Regression(0.003814697,1000000).fit_adagrad(x[0:4512],y[0:4512])
+    print("rmse",k.validate(x[4512:],y[4512:]))
+    
     with open('submission.csv',"w+") as fd:
         print("id,value",file=fd) 
         for i in range(0,240):
