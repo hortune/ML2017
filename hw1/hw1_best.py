@@ -45,13 +45,14 @@ class Regression(object):
         errors/=len(y)
         return errors**0.5
 
-def sample(data):
+def sample(data,condition):
     res = []
     for k in data:
         d = []
-        for i in k:
-            for j in range(5,9):
-                d.append(i[j])
+        for i in range(0,18):
+            for q in range(0,len(condition[i])):
+                for j in range(9-condition[i][q],9):
+                    d.append(k[i][j]**(q+1))
         res.append(d)
     return np.array(res)
 def increase_data(data):
@@ -76,35 +77,45 @@ def increase_data(data):
             i+=1
     print ("first",len(ret),"second",len(ret[0]),"third",len(ret[0][0]))
     return np.array(ret),np.array(ans)
-def load_training_data(filename):
+def load_training_data(filename,condition):
     data=genfromtxt(filename,delimiter=',')
     for i in range(0,data.shape[0]):
         for j in range(0,data.shape[1]):
             if math.isnan(data[i][j]):
                 data[i][j]=0
-    data=np.delete(np.delete(data,0,0),np.s_[0,3],1)
+    data=np.delete(np.delete(data,0,0),np.s_[0:3],1)
+    print (data[0])
     data,y = increase_data(data)
-    x= sample(data)
+    x= sample(data,condition)
     return (x,y)
-def load_testing_data(filename):
+def load_testing_data(filename,condition):
     data=genfromtxt(filename,delimiter=',')
     for i in range(0,data.shape[0]):
         for j in range(0,data.shape[1]):
             if math.isnan(data[i][j]):
                 data[i][j]=0
-    data=np.delete(data,np.s_[0,2],1)
+    data=np.delete(data,np.s_[0:2],1)
     data=np.split(data,240)
-    return sample(data)
+    return sample(data,condition)
 
-x,y= load_training_data('train.csv')
-test_data=load_testing_data('test_X.csv')
-delta,init = 2,500
-for i in range(0,50):
-    print ("learning rate",init)
-    k=Regression(init,10000).fit_adagrad(x[0:4512],y[0:4512])
-    init/=delta
-    print("rmse",k.validate(x[4512:],y[4512:]))
-with open('submission.csv',"w+") as fd:
-    print("id,value",file=fd) 
-    for i in range(0,240):
-        print("id_"+str(i)+","+str(k.activation(test_data[i])),file=fd)
+if __name__=='__main__':
+    condition=[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
+    condition[9].append(9)
+    condition[9].append(4)
+    condition[8].append(5)
+    condition[8].append(2)
+    condition[7].append(3)
+    condition[10].append(2)
+    x,y= load_training_data('train.csv',condition)
+    test_data=load_testing_data('test_X.csv',condition)
+    delta,init = 2,500
+    print(x[0])
+    for i in range(0,50):
+        print ("learning rate",init)
+        k=Regression(init,50000).fit_adagrad(x[0:4512],y[0:4512])
+        init/=delta
+        print("rmse",k.validate(x[4512:],y[4512:]))
+    with open('submission.csv',"w+") as fd:
+        print("id,value",file=fd) 
+        for i in range(0,240):
+            print("id_"+str(i)+","+str(k.activation(test_data[i])),file=fd)

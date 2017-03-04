@@ -68,7 +68,7 @@ def load_testing_data(filename):
         for j in range(0,data.shape[1]):
             if math.isnan(data[i][j]):
                 data[i][j]=0
-    data=np.delete(data,np.s_[0,2],1)
+    data=np.delete(data,np.s_[0:2],1)
     data=np.split(data,240)
     #return np.array([ np.ravel(i) for i in data])
     return sample(data)
