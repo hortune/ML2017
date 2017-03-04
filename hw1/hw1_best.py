@@ -36,8 +36,14 @@ class Regression(object):
                 self.w_[1:]+=self.eta*grad/(k**0.5)
                 self.w_[0]+=self.eta*errors.sum()/(g**0.5)
                 cost=np.sum(errors**2)
-        print (cost)
+        print (cost/len(x))
         return self
+    def validate(self,x,y):
+        errors = 0
+        for x_,y_ in zip(x,y):
+            errors+=(self.activation(x_)-y_)**2
+        errors/=len(y)
+        return errors**0.5
 
 def sample(data):
     res = []
@@ -48,18 +54,36 @@ def sample(data):
                 d.append(i[j])
         res.append(d)
     return np.array(res)
+def increase_data(data):
+    data = np.split(data,12)
+    ret = []
+    ans = [] 
+    for mon in data:
+        date_data = np.split(mon,20)
+        mo = []
+        for i in range(0,18):
+            mo.append([])
+        for i in date_data:
+            for j in range(0,18):
+                mo[j]+=list(i[j])
+        i=0
+        while (i+10)<480:
+            simple=[]
+            for q in range(0,18):
+                simple.append(mo[q][i:i+9])
+            ret.append(simple)
+            ans.append(mo[9][i+9])
+            i+=1
+    print ("first",len(ret),"second",len(ret[0]),"third",len(ret[0][0]))
+    return np.array(ret),np.array(ans)
 def load_training_data(filename):
     data=genfromtxt(filename,delimiter=',')
     for i in range(0,data.shape[0]):
         for j in range(0,data.shape[1]):
             if math.isnan(data[i][j]):
                 data[i][j]=0
-    data=np.delete(np.delete(data,0,0),np.s_[0:3],1)
-    data=np.delete(data,np.s_[10:],1)
-    data=np.split(data,240)
-    y=np.array([ i[9][9] for i in data])
-    #data=np.delete(data,np.s_[9:],2)
-    #x=np.array([ np.ravel(i) for i in data])
+    data=np.delete(np.delete(data,0,0),np.s_[0,3],1)
+    data,y = increase_data(data)
     x= sample(data)
     return (x,y)
 def load_testing_data(filename):
@@ -70,22 +94,19 @@ def load_testing_data(filename):
                 data[i][j]=0
     data=np.delete(data,np.s_[0,2],1)
     data=np.split(data,240)
-    #return np.array([ np.ravel(i) for i in data])
     return sample(data)
+
 x,y= load_training_data('train.csv')
 test_data=load_testing_data('test_X.csv')
 delta = 2
 init = 500
+
+print (y[0:10])
 for i in range(0,50):
     print ("learning rate",init)
-    k=Regression(init,10000000).fit_adagrad(x,y)
-    break
+    k=Regression(init,10000).fit_adagrad(x[0:4512],y[0:4512])
     init/=delta
-total_data=240
-total_true=0
-for (a,b) in zip (x,y):
-    if int(k.activation(a)) == b:
-        total_true = total_true+1
+    print("rmse",k.validate(x[4512:],y[4512:]))
 with open('submission.csv',"w+") as fd:
     print("id,value",file=fd) 
     for i in range(0,240):
