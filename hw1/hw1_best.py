@@ -11,7 +11,6 @@ class Regression(object):
         self.n_iter = n_iter
     def fit(self,x,y):
         self.w_ = np.zeros(1 + x.shape[1]) # make bias the zero one
-        cost=1
         x_mon = np.split(x,12)
         y_mon = np.split(y,12)
         for i in range(0,self.n_iter):
@@ -19,14 +18,12 @@ class Regression(object):
                 errors = y- output
                 self.w_[1:]+=self.eta*x.T.dot(errors)
                 self.w_[0]+=self.eta*errors.sum()
-                loss = errors
-        print ((errors**2).sum())
         return self
     def activation(self,x):
         return np.dot(x,self.w_[1:])+self.w_[0]
     def fit_adagrad(self,x,y):
         self.w_ = np.zeros(1 + x.shape[1]) # make bias the zero one
-        cost,k,g=1,0,0
+        k,g=0,0
         for i in range(0,self.n_iter):
                 output = np.dot(x,self.w_[1:])+self.w_[0]
                 errors = y- output
@@ -35,8 +32,6 @@ class Regression(object):
                 g+= (errors.sum())**2
                 self.w_[1:]+=self.eta*grad/(k**0.5)
                 self.w_[0]+=self.eta*errors.sum()/(g**0.5)
-                cost=np.sum(errors**2)
-        print (cost/len(x))
         return self
     def validate(self,x,y):
         errors = 0
@@ -75,7 +70,6 @@ def increase_data(data):
             ret.append(simple)
             ans.append(mo[9][i+9])
             i+=1
-    print ("first",len(ret),"second",len(ret[0]),"third",len(ret[0][0]))
     return np.array(ret),np.array(ans)
 def load_training_data(filename,condition):
     data=genfromtxt(filename,delimiter=',')
@@ -84,7 +78,6 @@ def load_training_data(filename,condition):
             if math.isnan(data[i][j]):
                 data[i][j]=0
     data=np.delete(np.delete(data,0,0),np.s_[0:3],1)
-    print (data[0])
     data,y = increase_data(data)
     x= sample(data,condition)
     return (x,y)
@@ -109,7 +102,6 @@ if __name__=='__main__':
     x,y= load_training_data('train.csv',condition)
     test_data=load_testing_data('test_X.csv',condition)
     delta,init = 2,500
-    print(x[0])
     for i in range(0,50):
         print ("learning rate",init)
         k=Regression(init,50000).fit_adagrad(x[0:4512],y[0:4512])
