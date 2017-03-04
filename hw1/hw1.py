@@ -13,10 +13,9 @@ class Regression(object):
         cost=1
         for i in range(0,self.n_iter):
             output = np.dot(x,self.w_[1:])+self.w_[0]
-            errors = y- output 
+            errors = y- output
             self.w_[1:]+=self.eta*x.T.dot(errors)
             self.w_[0]+=self.eta*errors.sum()
-            #print (np.sum(errors**2))
             cost=np.sum(errors**2)
         print (cost)
         return self
@@ -47,7 +46,7 @@ def load_testing_data(filename):
     return np.array([ np.ravel(i) for i in data])
 x,y= load_training_data('train.csv')
 test_data=load_testing_data('test_X.csv')
-k=Regression(2.00506*1e-8,200000).fit(x,y)
+k=Regression(1e-8,200000).fit(x,y)
 #k=Regression(1e-8,200000).fit(x,y)
 total_data=240
 total_true=0
@@ -58,5 +57,5 @@ print (total_true/240.)
 with open('submission.csv',"w+") as fd:
     print("id,value",file=fd) 
     for i in range(0,240):
-        print("id_"+str(i)+","+str(int(k.activation(test_data[i]))),file=fd)
+        print("id_"+str(i)+","+str(k.activation(test_data[i])),file=fd)
 #try int and round
