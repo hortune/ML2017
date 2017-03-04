@@ -21,6 +21,6 @@
 
 ## Result with increase_data and validation
 |learning rate|type|iter|rmse|final|sample|
-|0.030517578125|adagrad|10000000|0.030517578125|TODO|172|
+|0.030517578125|adagrad|10000|0.030517578125|TODO|172|
 
 

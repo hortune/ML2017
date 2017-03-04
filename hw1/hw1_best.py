@@ -98,10 +98,7 @@ def load_testing_data(filename):
 
 x,y= load_training_data('train.csv')
 test_data=load_testing_data('test_X.csv')
-delta = 2
-init = 500
-
-print (y[0:10])
+delta = 2,500
 for i in range(0,50):
     print ("learning rate",init)
     k=Regression(init,10000).fit_adagrad(x[0:4512],y[0:4512])

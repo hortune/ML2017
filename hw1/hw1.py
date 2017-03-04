@@ -74,18 +74,11 @@ def load_testing_data(filename):
     return sample(data)
 x,y= load_training_data('train.csv')
 test_data=load_testing_data('test_X.csv')
-delta = 2
-init = 500
+delta,init = 2,500
 for i in range(0,50):
     print ("learning rate",init)
     k=Regression(init,10000000).fit_adagrad(x,y)
-    break
     init/=delta
-total_data=240
-total_true=0
-for (a,b) in zip (x,y):
-    if int(k.activation(a)) == b:
-        total_true = total_true+1
 with open('submission.csv',"w+") as fd:
     print("id,value",file=fd) 
     for i in range(0,240):
