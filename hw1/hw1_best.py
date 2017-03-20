@@ -4,6 +4,7 @@
 import numpy as np
 from numpy import *
 import math
+import sys
 
 class Regression(object):
     def __init__ (self, eta=1e-20, n_iter=100):
@@ -99,20 +100,33 @@ if __name__=='__main__':
     condition[8].append(2)
     condition[7].append(3)
     condition[10].append(2)
-    x,y= load_training_data('train.csv',condition)
-    test_data=load_testing_data('test_X.csv',condition)
+    x,y= load_training_data(sys.argv[1],condition)
+    test_data=load_testing_data(sys.argv[2],condition)
     """
-    delta,init = 2,500
-    for i in range(0,50):
-        print ("learning rate",init)
-        k=Regression(init,50000).fit_adagrad(x[0:4512],y[0:4512])
-        init/=delta
-        print("rmse",k.validate(x[4512:],y[4512:]))
-    """    
-    k=Regression(0.003814697,1000000).fit_adagrad(x[0:4512],y[0:4512])
-    print("rmse",k.validate(x[4512:],y[4512:]))
+    for index in range(0,18):
+        for trace_back in range(1,10): 
+            condition=[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
+            condition[index].extend([0,0,trace_back])
+        
+            x,y= load_training_data('train.csv',condition)
+            test_data=load_testing_data('test_X.csv',condition)
+            delta,init = 2,5000
+            prev_dev=100
+            for i in range(0,100):
+                k=Regression(init,10000).fit_adagrad(x[0:4512],y[0:4512])
+                init/=delta
+                valid = k.validate(x[4512:],y[4512:])
+                if prev_dev < valid: 
+                    print ("rmse",prev_dev,"learning rate",init*delta,"index",index,"trace back",trace_back)
+                    break
+                else:
+                    prev_dev = valid
+    """
+    #k=Regression(0.003814697,1000000).fit_adagrad(x,y)
+    k=Regression(0.011,1000000).fit_adagrad(x,y)
+    #print("rmse",k.validate(x[4512:],y[4512:]))
     
-    with open('submission.csv',"w+") as fd:
+    with open(sys.argv[3],"w+") as fd:
         print("id,value",file=fd) 
         for i in range(0,240):
-            print("id_"+str(i)+","+str(k.activation(test_data[i])),file=fd)
+            print("id_"+str(i)+","+str(round(k.activation(test_data[i]))),file=fd)
