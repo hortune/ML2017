@@ -15,19 +15,35 @@ class Regression(object):
         for i in range(0,self.n_iter):
                 wt_x = np.dot(x,self.w_)*y
                 ceta = 1./(np.ones(x.shape[0])+np.exp(wt_x))
-                gradient = np.dot(y.T*ceta.T,x)/(x.shape[0])
+                gradient = -np.dot(y.T*ceta.T,x)/(x.shape[0])
                 self.w_-= self.eta*gradient/((gradient**2).sum())**0.5
                 E_in = np.log(1./ceta).sum()/x.shape[0]
-                print("E_in : ",E_in)
+                print("E_in",E_in)
         return self
+    
+    def fit_hongyi(self,x,y):
+        self.w_ = np.zeros(x.shape[1]) # make bias the zero one
+        for i in range(0,self.n_iter):
+                wt_x = np.dot(x,self.w_)
+                ceta = 1./(np.ones(x.shape[0])+np.exp(-wt_x))
+                gradient = np.dot((y-ceta).T,x)
+                self.w_ += self.eta*gradient/((gradient**2).sum())**0.5
+                #E_in = -y*np.log(ceta).sum()+(np.ones(x.shape[0])-y)*np.log(np.ones(x.shape[0])-ceta)
+                
+                #E_in/=x.shape[0]
+                
+                #print("E_in",E_in.sum())
+        return self
+    
     def activation(self,x):
-        return 1./(np.ones(x.shape[0])+np.exp(-np.dot(x,self.w_)))
+        return 1./(np.array([1])+np.exp(-np.dot(x,self.w_.T)))
     
     def validate(self,x,y):
         error = 0
         for x_,y_ in zip(x,y):
-            print (self.activation(x_)[0])
-        return error
+            if round(self.activation(x_)[0])-y_:
+                error+=1
+        return error/x.shape[0]
 
 def shuffl(x,y):
     index_shuf = [i for i in range(x.shape[0])]
@@ -44,7 +60,7 @@ def load_training_data(filename,Y_filename,condition):
     y = genfromtxt(Y_filename,delimiter=',')
     x = np.hstack((np.ones((x.shape[0],1),dtype=x.dtype),x))    
     x = np.delete(x,0,0)
-    x = np.delete(x,np.s_[20:],1)
+    #x = np.delete(x,np.s_[20:],1)
     
     temp_x = []
     temp_y = []
@@ -60,12 +76,17 @@ def load_training_data(filename,Y_filename,condition):
     y = np.append(y,temp_y)
     return shuffl(x,y)
 if __name__=='__main__':
-    #x,y = load_training_data("X_train","Y_train",[])
+    x,y = load_training_data("X_train","Y_train",[])
     #print (y)
-    x = np.array([[1,2,3],
-        [1,2,3],
-        [2,3,4],
-        [5,6,8]])
-    y = np.array([1,1,1,0])
-    k = Regression(1e-10,100).fit(x,y)
-    print( k.validate(x,y))    
+    """
+    x = np.array([[0,0,0],
+        [10,10,10],
+        [9,9,9],
+        [7,8,9]])
+    y = np.array([0,1,1,1])
+    """
+    print(x.shape)
+    k = Regression(1e-4,10000).fit_hongyi(x[48000:],y[48000:])
+    print( k.validate(x[48000:],y[48000:]))    
+
+    # bug activation function fuck u
