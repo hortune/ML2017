@@ -22,23 +22,23 @@ class Regression(object):
                 print("E_in",E_in)
         return self
     """
-    def fit_hongyi(self,x,y):
+    def clean_weight(self):
+        for i in range(self.w_.shape[0]):
+            if abs(self.w_[i])<1e-4:
+                self.w_[i]=0
+    def fit_hongyi(self,x,y,lam=0):
         self.w_ = np.zeros(x.shape[1]) # make bias the zero one
         grad = np.ones(x.shape[1])
         for i in range(0,self.n_iter):
                 wt_x = np.dot(x,self.w_)
                 ceta = 1./(1+np.exp(-wt_x))
-                
-                
                 gradient = np.dot((y-ceta).T,x)
                 
-                grad += gradient**2
+                gradient += lam*(self.w_/x.shape[0])
+                
+                grad += gradient**2+
                 self.w_ += self.eta*(gradient/(grad**0.5))
-                #self.eta*=0.95 
-                #/((gradient**2).sum())**0.5
-                #print(self.validate(x,y))
         return self
-    
     def activation(self,x):
         return 1./(np.array([1])+np.exp(-np.dot(x,self.w_.T)))
     
@@ -47,8 +47,8 @@ class Regression(object):
         for x_,y_ in zip(x,y):
             if (abs(round(self.activation(x_)[0])-y_))>0.1:
                 error+=1
-        print("error : ",error)
-        print (error/x.shape[0])
+        #print("error : ",error)
+        #print (error/x.shape[0])
         return error/x.shape[0]
 
 def shuffl(x,y,normal):
@@ -61,51 +61,49 @@ def shuffl(x,y,normal):
         list2.append(y[i])
     return np.array(list1),np.array(list2),normal
 
-def load_training_data(filename,Y_filename,condition):
+def sample(x,i,j):
+    return np.hstack((x,x[:,i:j]**2))
+def load_training_data(filename,Y_filename,condition,s1,s2):
     x = genfromtxt(filename,delimiter=',')
     y = genfromtxt(Y_filename,delimiter=',')
-    x = np.hstack((np.ones((x.shape[0],1),dtype=x.dtype),x))    
+    #x = np.hstack((np.ones((x.shape[0],1),dtype=x.dtype),x))    
     x = np.delete(x,0,0)
-    #x = np.delete(x,np.s_[20:],1)
     
     temp_x = []
     temp_y = []
     
     x = np.delete(x,[2],1)
-    """
-    for x_,y_  in zip(x,y):
-        if y_ == 1:
-            temp_x.append(x_)
-            temp_x.append(x_)
-            temp_x.append(x_)
-            temp_y.append(y_)
-            temp_y.append(y_)
-            temp_y.append(y_)
-   
-    x = np.append(x,temp_x,axis=0)
-    """
     normal = x.max(axis=0)
     x = x/normal
-    #y = np.append(y,temp_y)
+    ##normal_2 = -(x.mean(axis=0))**2+(x**2).mean(axis=0)
+    #x = x/normal_2 
+    x = sample(x,s1,s2)
     
     return shuffl(x,y,normal)
 
-def load_testing_data(filename,normal):
+def load_testing_data(filename,normal,s1,s2):
     x = genfromtxt(filename,delimiter=',')
-    x = np.hstack((np.ones((x.shape[0],1),dtype=x.dtype),x)) 
+    #x = np.hstack((np.ones((x.shape[0],1),dtype=x.dtype),x)) 
     x = np.delete(x,0,0)
     x = np.delete(x,[2],1)
     x = x/normal
+    x = sample(x,s1,s2)
     return x
 if __name__=='__main__':
-    x,y,normal = load_training_data("X_train","Y_train",[])
-    #exit()
-    #print (y)
-    #x = np.array([[1,0,0,0],[1,3,3,3],[1,4,4,4],[1,5,5,5]])
-    #y = np.array([0,1,1,1])
-    k = Regression(0.5,30000).fit_hongyi(x,y)
-    
-    test = load_testing_data("X_test",normal)
+    x,y,normal = load_training_data("X_train","Y_train",[],1,2)
+    k = Regression(0.5,1000).fit_hongyi(x[:],y[:])
+    """
+    for iter1 in range(0,8):
+        for iter2 in range(iter1+1,8):
+            print("sample from {0} to {1}".format(iter1,iter2))
+            x,y,normal = load_training_data("X_train","Y_train",[],iter1,iter2)
+            k = Regression(0.5,2000).fit_hongyi(x,y)
+            res = k.validate(x,y)
+            print("average {0}".format(res))
+    """
+    #k.clean_weight()
+    print(k.validate(x[30000:],y[30000:]))
+    test = load_testing_data("X_test",normal,1,2)
     with open("submission.csv","w+") as fd:
         print("id,label",file=fd) 
         for i,j in enumerate(test):
