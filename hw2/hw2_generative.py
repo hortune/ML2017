@@ -35,8 +35,15 @@ def load_training_data(filename,Y_filename):
     x = genfromtxt(filename,delimiter=',',dtype=np.float64)
     y = genfromtxt(Y_filename,delimiter=',')
     x = np.delete(x,0,0)
-    normal = x.max(axis=0)
-    x = x/normal
+    
+    """
+    normalize prevent underflow
+    """
+    mean = x.mean(axis=0)
+    x -= mean
+    sigma = (x**2).mean(axis=0)/x.shape[0]
+    x /= sigma
+    
     
     true_data=[]
     false_data=[]
@@ -46,16 +53,16 @@ def load_training_data(filename,Y_filename):
             false_data.append(q)
         else:
             true_data.append(q)
-     return np.array(true_data),np.array(false_data),normal
+    return np.array(true_data),np.array(false_data),mean,sigma
 
 def load_testing_data(filename,normal,s1,s2):
-    x = genfromtxt(filename,delimiter=',',dtype=np.float128)
+    x = genfromtxt(filename,delimiter=',')
     x = np.delete(x,0,0)
     x = x/normal
     return x
     
 if __name__=='__main__':
-    true_data,false_data,normal = load_training_data("X_train","Y_train")
+    true_data,false_data,mean,sigma = load_training_data("X_train","Y_train")
     k = Generative().guassian_model(true_data,false_data)
     #k.activate(x)
     #test = load_testing_data("X_test",normal,0,6)
