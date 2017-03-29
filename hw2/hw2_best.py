@@ -33,10 +33,8 @@ class Regression(object):
                 wt_x = np.dot(x,self.w_)
                 ceta = 1./(1+np.exp(-wt_x))
                 gradient = np.dot((y-ceta).T,x)
-                
                 gradient += lam*(self.w_/x.shape[0])
-                
-                grad += gradient**2+
+                grad += gradient**2
                 self.w_ += self.eta*(gradient/(grad**0.5))
         return self
     def activation(self,x):
@@ -66,44 +64,33 @@ def sample(x,i,j):
 def load_training_data(filename,Y_filename,condition,s1,s2):
     x = genfromtxt(filename,delimiter=',')
     y = genfromtxt(Y_filename,delimiter=',')
-    #x = np.hstack((np.ones((x.shape[0],1),dtype=x.dtype),x))    
     x = np.delete(x,0,0)
     
     temp_x = []
     temp_y = []
     
-    x = np.delete(x,[2],1)
+    x = np.delete(x,[1],1)
     normal = x.max(axis=0)
     x = x/normal
-    ##normal_2 = -(x.mean(axis=0))**2+(x**2).mean(axis=0)
-    #x = x/normal_2 
     x = sample(x,s1,s2)
-    
+    x = np.hstack((np.ones((x.shape[0],1),dtype=x.dtype),x))    
     return shuffl(x,y,normal)
 
 def load_testing_data(filename,normal,s1,s2):
     x = genfromtxt(filename,delimiter=',')
     #x = np.hstack((np.ones((x.shape[0],1),dtype=x.dtype),x)) 
     x = np.delete(x,0,0)
-    x = np.delete(x,[2],1)
+    x = np.delete(x,[1],1)
     x = x/normal
     x = sample(x,s1,s2)
+    x = np.hstack((np.ones((x.shape[0],1),dtype=x.dtype),x)) 
     return x
+    
 if __name__=='__main__':
-    x,y,normal = load_training_data("X_train","Y_train",[],1,2)
-    k = Regression(0.5,1000).fit_hongyi(x[:],y[:])
-    """
-    for iter1 in range(0,8):
-        for iter2 in range(iter1+1,8):
-            print("sample from {0} to {1}".format(iter1,iter2))
-            x,y,normal = load_training_data("X_train","Y_train",[],iter1,iter2)
-            k = Regression(0.5,2000).fit_hongyi(x,y)
-            res = k.validate(x,y)
-            print("average {0}".format(res))
-    """
-    #k.clean_weight()
-    print(k.validate(x[30000:],y[30000:]))
-    test = load_testing_data("X_test",normal,1,2)
+    x,y,normal = load_training_data("X_train","Y_train",[],0,105)
+    k = Regression(0.5,30000).fit_hongyi(x[:],y[:])
+    print(k.validate(x[:],y[:]))
+    test = load_testing_data("X_test",normal,0,105)
     with open("submission.csv","w+") as fd:
         print("id,label",file=fd) 
         for i,j in enumerate(test):
