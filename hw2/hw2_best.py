@@ -60,8 +60,10 @@ def shuffl(x,y,normal):
     return np.array(list1),np.array(list2),normal
 
 def sample(x,i,j):
-    k  = np.hstack((x,x[:,i:j]**2))
-    return np.hstack((k,k[:,i:j]**3))
+    x  = np.hstack((x,x[:,i:j]**2))
+    x  = np.hstack((x,x[:,i:j]**3))
+    x  = np.hstack((x,x[:,i:j]**4))
+    return np.hstack((x,x[:,i:j]**5))
 def load_training_data(filename,Y_filename,condition,s1,s2):
     x = genfromtxt(filename,delimiter=',')
     y = genfromtxt(Y_filename,delimiter=',')
@@ -88,10 +90,10 @@ def load_testing_data(filename,normal,s1,s2):
     return x
     
 if __name__=='__main__':
-    x,y,normal = load_training_data("X_train","Y_train",[],0,105)
-    k = Regression(0.5,1000).fit_hongyi(x[:],y[:],lam=0)
+    x,y,normal = load_training_data("X_train","Y_train",[],0,6)
+    k = Regression(0.5,30000).fit_hongyi(x[:],y[:],lam=1)
     print(k.validate(x[:],y[:]))
-    test = load_testing_data("X_test",normal,0,105)
+    test = load_testing_data("X_test",normal,0,6)
     with open("submission.csv","w+") as fd:
         print("id,label",file=fd) 
         for i,j in enumerate(test):
