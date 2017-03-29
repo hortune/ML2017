@@ -17,24 +17,23 @@ class Generative(object):
     def guassian_model(self,c1,c2):
         self.true_mean,true_sigma = self.guassian_mean_sigma(c1)
         self.false_mean, false_sigma = self.guassian_mean_sigma(c2)
-        self.true_denominator = (np.linalg.slogdet(true_sigma))
-        self.false_denominator = (np.linalg.slogdet(false_sigma))
-        print (self.true_denominator)
-        print (self.false_denominator)
-       
-        print (true_sigma)
-        self.true_inverse = np.linalg.pinv(true_sigma)
-        self.false_inverse = np.linalg.inv(false_sigma)
-        #print(self.true_inverse)
+        
+        self.rate = c1.shape[0]/(c2.shape[0]+c1.shape[0])
+        self.sigma = true_sigma*self.rate + (1-self.rate)*false_sigma
+        self.inverse = np.linalg.inv(self.sigma)
         return self       
 
     def activate(self,x):
         true_x = x-self.true_mean
-        true_numerator = -(true_x.dot(self.true_inverse)*true_x).sum(axis=1)/2
-        true_numerator -= self.true_denominator[1]/2
-        print(true_numerator)
-        print(true_numerator.shape)
+        true_numerator = -(true_x.dot(self.inverse)*true_x).sum(axis=1)/2
+
+        false_x = x-self.false_mean
+        false_numerator = -(false_x.dot(self.inverse)*true_x).sum(axis=1)/2
         
+        numerator = false_numerator - true_numerator
+        print(numerator)
+        #ans = 1/(1+np.exp(numerator)*self.rate/(1-self.rate))
+        #print(ans[0])
 def load_training_data(filename,Y_filename):
     x = genfromtxt(filename,delimiter=',',dtype=np.float64)
     y = genfromtxt(Y_filename,delimiter=',')
@@ -44,9 +43,9 @@ def load_training_data(filename,Y_filename):
     normalize prevent underflow
     """
     mean = x.mean(axis=0,dtype=np.float64)
-    #x -= mean
+    x -= mean
     sigma = (x**2).mean(axis=0,dtype=np.float64)/x.shape[0]
-    #x /= x.max(axis=0)#sigma
+    x /= sigma
     
     
     true_data=[]
