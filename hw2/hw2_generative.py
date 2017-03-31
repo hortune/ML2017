@@ -8,9 +8,10 @@ from random import shuffle
 
 class Generative(object):
     def guassian_mean_sigma(self,c1):
-        mean = c1.sum(axis=0,dtype=np.float64)/c1.shape[0]
+        mean = c1.mean(axis=0,dtype=np.float64)
         x_minus_mean = c1-mean
         #x_minus_mean = x_minus_mean.sum(axis=0,dtype=np.float64)/c1.shape[0]
+        
         sigma = 0
         for row in x_minus_mean:
             sigma += np.outer(row,row)
@@ -20,13 +21,12 @@ class Generative(object):
     def guassian_model(self,c1,c2):
         self.true_mean,true_sigma = self.guassian_mean_sigma(c1)
         self.false_mean, false_sigma = self.guassian_mean_sigma(c2)
-        
+        #print(true_sigma[0])
         self.rate = c1.shape[0]/(c2.shape[0]+c1.shape[0])
         self.sigma = true_sigma*self.rate + (1-self.rate)*false_sigma
         self.inverse = np.linalg.inv(self.sigma)
-    
         return self       
-
+    """
     def activate(self,x):
         true_x = x-self.true_mean
         true_numerator = -(true_x.dot(self.inverse)*true_x).sum(axis=1)/2
@@ -37,13 +37,17 @@ class Generative(object):
         numerator = false_numerator - true_numerator
         ans = 1/(1+np.exp(numerator)*self.rate/(1-self.rate))
         return ans
+    """
+
     def new_activate(self,x):
         w = (self.true_mean-self.false_mean).dot(self.inverse).dot(x.T)
+        #print(w)
         b1 = -(self.true_mean).dot(self.inverse).dot(self.true_mean.T)/2
         b2 = (self.false_mean).dot(self.inverse).dot(self.false_mean.T)/2
         b3 = math.log((self.rate)/(1-self.rate))
-        ans = 1/(1+np.exp(-w+b1-b2-b3))
+        ans = 1/(1+np.exp(-w-b1-b2-b3))
         return ans
+    
     def validate(self,x,y):
         ans = self.new_activate(x)
         error = 0
@@ -57,25 +61,26 @@ def load_training_data(filename,Y_filename):
     x = genfromtxt(filename,delimiter=',',dtype=np.float64)
     y = genfromtxt(Y_filename,delimiter=',')
     x = np.delete(x,0,0)
-    
-    #x = np.hstack((x,x[:,0].reshape((x.shape[0],1))**3/1e-11))
-    x = np.hstack((x,x[:,0:6]**2/1e-5))
+    """
     x = np.hstack((x,x[:,0:6]**3/1e-11))
-    #x = np.hstack((x,x[:,0:6]**4/1e-20))
+    x = np.hstack((x,x[:,0:6]**0.5/1e-3))
+    x = np.hstack((x,x[:,0:6]**1.5/1e-18))
+    x = np.hstack((x,x[:,0:6]**2/1e-15))
+    x = np.hstack((x,x[:,0:6]**2.5/1e-20))
+    """
     mean = x.mean(axis=0,dtype=np.float64)
     x -= mean
-    sigma = (x**2).mean(axis=0,dtype=np.float64)/x.shape[0]
-    x /= sigma
-    
+    #sigma = np.sqrt((x**2).mean(axis=0,dtype=np.float64)/x.shape[0])
+    std = x.std(axis=0)
+    x /= std
     true_data=[]
     false_data=[]
-    
     for q,p in zip(x,y):
         if p == 0:
             false_data.append(q)
         else:
             true_data.append(q)
-    return x,y,np.array(true_data),np.array(false_data),mean,sigma
+    return x,y,np.array(true_data),np.array(false_data),mean,std
 
 def load_testing_data(filename,normal,s1,s2):
     x = genfromtxt(filename,delimiter=',')
