@@ -1,4 +1,3 @@
-from keras import backend as K
 import numpy as np
 from numpy import genfromtxt
 from keras.models import Sequential
@@ -8,8 +7,6 @@ from keras.optimizers import SGD, Adam
 from keras.utils import np_utils
 from keras.datasets import mnist
 #categorical_crossentropy
-
-K.set_image_dim_ordering('tf')
 
 def load_raw_data(name):
         file_name = open(name,'r')
@@ -52,41 +49,37 @@ model.fit(x_train,y_train,batch_size=100,epochs=20)
 
 score = model.evaluate(x_train,y_train)
 print '\nTrain Acc:', score[1]
-
+score = model.evaluate(x_test,y_test)
 print '\nTest Acc:', score[1]
 """
 model2 = Sequential()
-model2.add(Conv2D(32,(3,3),input_shape=(48,48,1)))
+model2.add(Conv2D(25,(3,3),input_shape=(48,48,1)))
 model2.add(BatchNormalization())
-model2.add(Dropout(0.25))
-model2.add(Conv2D(32,(3,3)))
-#model2.add(MaxPooling2D((2,2)))
-model2.add(Dropout(0.25))
-model2.add(AveragePooling2D((2,2)))
+model2.add(MaxPooling2D((2,2)))
+#model2.add(AveragePooling2D((2,2)))
 
-model2.add(Conv2D(64,(3,3)))
+model2.add(Dropout(0.3))
+
+model2.add(Conv2D(50,(3,3)))
 model2.add(BatchNormalization())
-model2.add(Dropout(0.25))
-model2.add(Conv2D(64,(3,3)))
-#model2.add(MaxPooling2D((2,2)))
-model2.add(Dropout(0.25))
-model2.add(AveragePooling2D((2,2)))
+model2.add(MaxPooling2D((2,2)))
+#model2.add(AveragePooling2D((2,2)))
+model2.add(Dropout(0.3))
 
-model2.add(Conv2D(128,(3,3)))
+model2.add(Conv2D(100,(3,3)))
 model2.add(BatchNormalization())
-model2.add(Dropout(0.25))
-model2.add(Conv2D(128,(3,3)))
-model2.add(Dropout(0.25))
-#model2.add(MaxPooling2D((2,2)))
-model2.add(AveragePooling2D((2,2)))
+model2.add(MaxPooling2D((2,2)))
+#model2.add(AveragePooling2D((2,2)))
+model2.add(Dropout(0.3))
 
-
-
-
+model2.add(Conv2D(250,(3,3)))
+model2.add(BatchNormalization())
+model2.add(MaxPooling2D((2,2)))
+#model2.add(AveragePooling2D((2,2)))
+model2.add(Dropout(0.3))
 model2.add(Flatten())
 
-model2.add(Dense(units=787,activation='relu'))
-model2.add(Dropout(0.5))
+model2.add(Dense(units=1000,activation='relu'))
 model2.add(Dense(units=7,activation='softmax'))
 model2.summary()
 
@@ -95,8 +88,8 @@ x_validate = x_validate.reshape(x_validate.shape[0],48,48,1)
 
 x_test = x_test.reshape(x_test.shape[0],48,48,1)
 model2.compile(loss='categorical_crossentropy',optimizer="adam",metrics=['accuracy'])
-model2.fit(x_train,y_train,batch_size=100,epochs=100,validation_split=0.1)
 
+model2.fit(x_train,y_train,batch_size=100,epochs=100,validation_split=0.1)
 
 score = model2.evaluate(x_train,y_train)
 print '\nTrain Acc:', score[1]
