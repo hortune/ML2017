@@ -1,3 +1,10 @@
+
+import tensorflow as tf
+from keras.backend.tensorflow_backend import set_session
+config = tf.ConfigProto()
+config.gpu_options.per_process_gpu_memory_fraction = 0.3
+set_session(tf.Session(config=config))
+
 from keras import backend as K
 import numpy as np
 from numpy import genfromtxt
@@ -6,7 +13,6 @@ from keras.layers.core import Dense, Dropout, Activation
 from keras.layers import Conv2D, MaxPooling2D, Flatten,AveragePooling2D, BatchNormalization
 from keras.optimizers import SGD, Adam
 from keras.utils import np_utils
-from keras.datasets import mnist
 #categorical_crossentropy
 
 K.set_image_dim_ordering('tf')
