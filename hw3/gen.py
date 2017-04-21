@@ -1,7 +1,7 @@
 import tensorflow as tf
 from keras.backend.tensorflow_backend import set_session
 config = tf.ConfigProto()
-config.gpu_options.per_process_gpu_memory_fraction = 0.5
+config.gpu_options.per_process_gpu_memory_fraction = 1
 set_session(tf.Session(config=config))
 import numpy as np
 
@@ -11,6 +11,7 @@ from keras.layers.core import Dense, Dropout, Activation
 from keras.layers import Conv2D, MaxPooling2D, Flatten,AveragePooling2D, BatchNormalization
 from keras.optimizers import SGD, Adam
 from keras.utils import np_utils
+import keras.preprocessing.image as img
 #categorical_crossentropy
 
 def load_raw_data(name):
@@ -42,64 +43,76 @@ def load_data():
 x_train,y_train,x_validate,y_validate,x_test=load_data()
 
 """
-model = Sequential()
-model.add(Dense(input_dim=28*28,units=689,activation='relu'))
-model.add(Dense(units=689,activation='relu'))
-model.add(Dense(units=689,activation='relu'))
-model.add(Dense(units=10,activation='softmax'))
-model.summary()
+model2 = Sequential()
+model2.add(Conv2D(25,(3,3),input_shape=(48,48,1),padding="same"))
 
-model.compile(loss='categorical_crossentropy',optimizer="adam",metrics=['accuracy'])
-model.fit(x_train,y_train,batch_size=100,epochs=20)
+model2.add(BatchNormalization())
+model2.add(MaxPooling2D((2,2)))
+#model2.add(AveragePooling2D((2,2)))
 
-score = model.evaluate(x_train,y_train)
-print '\nTrain Acc:', score[1]
-score = model.evaluate(x_test,y_test)
-print '\nTest Acc:', score[1]
+model2.add(Dropout(0.3))
+
+model2.add(Conv2D(50,(3,3),padding="same"))
+model2.add(BatchNormalization())
+model2.add(MaxPooling2D((2,2)))
+#model2.add(AveragePooling2D((2,2)))
+model2.add(Dropout(0.3))
+
+model2.add(Conv2D(100,(3,3),padding="same"))
+model2.add(BatchNormalization())
+model2.add(MaxPooling2D((2,2)))
+#model2.add(AveragePooling2D((2,2)))
+model2.add(Dropout(0.5))
+
+model2.add(Conv2D(125,(3,3)))
+model2.add(BatchNormalization())
+model2.add(MaxPooling2D((2,2)))
+#model2.add(AveragePooling2D((2,2)))
+model2.add(Dropout(0.5))
+
+model2.add(Conv2D(250,(3,3)))
+model2.add(BatchNormalization())
+model2.add(MaxPooling2D((2,2)))
+#model2.add(AveragePooling2D((2,2)))model2.add(Dropout(0.5))
 """
 model2 = Sequential()
-model2.add(Conv2D(8,(3,3),input_shape=(48,48,1)))
+model2.add(Conv2D(25,(3,3),input_shape=(48,48,1)))
 model2.add(BatchNormalization())
 #model2.add(MaxPooling2D((2,2)))
 #model2.add(AveragePooling2D((2,2)))
+
 model2.add(Dropout(0.3))
 
-model2.add(Conv2D(16,(3,3)))
-model2.add(BatchNormalization())
-#model2.add(MaxPooling2D((2,2)))
-#model2.add(AveragePooling2D((2,2)))
-model2.add(Dropout(0.3))
-
-model2.add(Conv2D(32,(3,3)))
-model2.add(BatchNormalization())
-#model2.add(MaxPooling2D((2,2)))
-#model2.add(AveragePooling2D((2,2)))
-model2.add(Dropout(0.4))
-
-model2.add(Conv2D(64,(3,3)))
+model2.add(Conv2D(50,(3,3)))
 model2.add(BatchNormalization())
 model2.add(MaxPooling2D((2,2)))
 #model2.add(AveragePooling2D((2,2)))
-model2.add(Dropout(0.45))
+model2.add(Dropout(0.3))
 
-model2.add(Conv2D(128,(3,3)))
+model2.add(Conv2D(100,(3,3)))
 model2.add(BatchNormalization())
 model2.add(MaxPooling2D((2,2)))
 #model2.add(AveragePooling2D((2,2)))
 model2.add(Dropout(0.5))
 
-model2.add(Conv2D(256,(3,3)))
+model2.add(Conv2D(125,(3,3)))
 model2.add(BatchNormalization())
 model2.add(MaxPooling2D((2,2)))
 #model2.add(AveragePooling2D((2,2)))
 model2.add(Dropout(0.5))
 
-
+model2.add(Conv2D(250,(3,3)))
+model2.add(BatchNormalization())
+model2.add(MaxPooling2D((2,2)))
+#model2.add(AveragePooling2D((2,2)))
+model2.add(Dropout(0.5))
 model2.add(Flatten())
 
 model2.add(Dense(units=1000,activation='relu'))
 model2.add(Dense(units=7,activation='softmax'))
 model2.summary()
+
+
 
 x_train = x_train.reshape(x_train.shape[0],48,48,1)
 x_validate = x_validate.reshape(x_validate.shape[0],48,48,1)
@@ -107,7 +120,15 @@ x_validate = x_validate.reshape(x_validate.shape[0],48,48,1)
 x_test = x_test.reshape(x_test.shape[0],48,48,1)
 model2.compile(loss='categorical_crossentropy',optimizer="adam",metrics=['accuracy'])
 
-model2.fit(x_train,y_train,batch_size=100,epochs=100,validation_split=0.1)
+datagen = img.ImageDataGenerator(
+	rotation_range = 5,
+	horizontal_flip=True
+)
+datagen.fit(x_train)
+model2.fit_generator(datagen.flow(x_train,y_train,batch_size=32),steps_per_epoch=len(x_train),epochs=5)
+#model2.fit(x_train,y_train,batch_size=100,epochs=100,validation_split=0.1)
+
+
 
 score = model2.evaluate(x_train,y_train)
 print '\nTrain Acc:', score[1]
