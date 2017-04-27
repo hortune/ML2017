@@ -125,13 +125,13 @@ x_test = x_test.reshape(x_test.shape[0],48,48,1)
 model2.compile(loss='categorical_crossentropy',optimizer="adam",metrics=['accuracy'])
 
 datagen = img.ImageDataGenerator(
-	rotation_range = 3,
+	rotation_range = 5,
 	horizontal_flip=True,
-    width_shift_range=0.2,
-    height_shift_range=0.2
+    width_shift_range=0.3,
+    height_shift_range=0.3
 )
 datagen.fit(x_train)
-model2.fit_generator(datagen.flow(x_train,y_train,batch_size=128),steps_per_epoch=len(x_train)/64,epochs=250)
+model2.fit_generator(datagen.flow(x_train,y_train,batch_size=128),steps_per_epoch=len(x_train)/64,epochs=500)
 #model2.fit(x_train,y_train,batch_size=100,epochs=20,validation_split=0.1)
 
 
