@@ -1,7 +1,7 @@
 import tensorflow as tf
 from keras.backend.tensorflow_backend import set_session
 config = tf.ConfigProto()
-config.gpu_options.per_process_gpu_memory_fraction = 1
+config.gpu_options.per_process_gpu_memory_fraction = 0.15
 set_session(tf.Session(config=config))
 import numpy as np
 
@@ -28,16 +28,16 @@ class History(Callback):
         self.val_accs.append(logs.get('val_acc'))
 
 def dump_history(logs):
-    with open('train_loss','a') as f:
+    with open('report_work/train_loss','a') as f:
         for loss in logs.tr_losses:
             f.write('{}\n'.format(loss))
-    with open('train_accuracy','a') as f:
+    with open('report_work/train_accuracy','a') as f:
         for acc in logs.tr_accs:
             f.write('{}\n'.format(acc))
-    with open('valid_loss','a') as f:
+    with open('report_work/valid_loss','a') as f:
         for loss in logs.val_losses:
             f.write('{}\n'.format(loss))
-    with open('valid_accuracy','a') as f:
+    with open('report_work/valid_accuracy','a') as f:
         for acc in logs.val_accs:
             f.write('{}\n'.format(acc))
 def load_raw_data(name):
@@ -64,7 +64,7 @@ def load_data():
         x_train = x_train/255
         x_test = x_test/255
 	#x_test=np.random.normal(x_test)
-        return x_train[:20000],y_train[:20000],x_train[20000:],y_train[20000:],x_test
+        return x_train[:22000],y_train[:22000],x_train[22000:],y_train[22000:],x_test
 
 x_train,y_train,x_validate,y_validate,x_test=load_data()
 
@@ -124,8 +124,8 @@ datagen = img.ImageDataGenerator(
     height_shift_range=0.2
 )
 datagen.fit(x_train)
-history = model2.History()
-model2.fit_generator(datagen.flow(x_train,y_train,batch_size=128),steps_per_epoch=len(x_train)/16,epochs=5,validation_data=(x_validate,y_validate),callbacks=[history])
+history = History()
+model2.fit_generator(datagen.flow(x_train,y_train,batch_size=128),steps_per_epoch=len(x_train)/16,epochs=500,validation_data=(x_validate,y_validate),callbacks=[history])
 
 dump_history(history)
 
@@ -133,7 +133,7 @@ score = model2.evaluate(x_train,y_train)
 print '\nTrain Acc:', score[1]
 score = model2.evaluate(x_validate,y_validate)
 print '\nVal Acc:', score[1]
-model2.save('last_model')
+model2.save('lastcnn_model')
 
 file_name = open('last.csv','w')
 res = model2.predict_classes(x_test)

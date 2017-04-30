@@ -1,10 +1,11 @@
 import tensorflow as tf
 from keras.backend.tensorflow_backend import set_session
 config = tf.ConfigProto()
-config.gpu_options.per_process_gpu_memory_fraction = 1
+config.gpu_options.per_process_gpu_memory_fraction = 0.15
 set_session(tf.Session(config=config))
 import numpy as np
 
+from keras.callbacks import Callback
 from numpy import genfromtxt
 from keras.models import Sequential,load_model
 from keras.layers.core import Dense, Dropout, Activation
@@ -15,6 +16,32 @@ import keras.preprocessing.image as img
 
 #categorical_crossentropy
 
+class History(Callback):
+    def on_train_begin(self,logs={}):
+        self.tr_losses=[]
+        self.val_losses=[]
+        self.tr_accs=[]
+        self.val_accs=[]
+
+    def on_epoch_end(self,epoch,logs={}):
+        self.tr_losses.append(logs.get('loss'))
+        self.val_losses.append(logs.get('val_loss'))
+        self.tr_accs.append(logs.get('acc'))
+        self.val_accs.append(logs.get('val_acc'))
+
+def dump_history(logs):
+    with open('train_loss','a') as f:
+        for loss in logs.tr_losses:
+            f.write('{}\n'.format(loss))
+    with open('train_accuracy','a') as f:
+        for acc in logs.tr_accs:
+            f.write('{}\n'.format(acc))
+    with open('valid_loss','a') as f:
+        for loss in logs.val_losses:
+            f.write('{}\n'.format(loss))
+    with open('valid_accuracy','a') as f:
+        for acc in logs.val_accs:
+            f.write('{}\n'.format(acc))
 def load_raw_data(name):
         file_name = open(name,'r')
         x = []
@@ -32,7 +59,7 @@ def load_data():
         y_train = np_utils.to_categorical(y_train, 7)
         x_train = x_train/255
         x_test = x_test/255
-        return x_train,y_train,x_train[20000:],y_train[20000:],x_test
+        return x_train[:20000],y_train[:20000],x_train[20000:],y_train[20000:],x_test
 def make_model():
         model2 = Sequential()
         model2.add(Conv2D(25,(3,3),input_shape=(48,48,1)))
@@ -89,7 +116,12 @@ datagen = img.ImageDataGenerator(
     height_shift_range=0.2
 )
 datagen.fit(x_train)
-model2.fit_generator(datagen.flow(x_train,y_train,batch_size=128),steps_per_epoch=len(x_train)/16,epochs=100,validation_data=(x_validate,y_validate))
+
+history = History()
+model2.fit_generator(datagen.flow(x_train,y_train,batch_size=128),steps_per_epoch=len(x_train)/16,epochs=300,validation_data=(x_validate,y_validate),callbacks=[history])
+
+dump_history(history)
+
 
 score = model2.evaluate(x_train,y_train)
 print '\nTrain Acc:', score[1]
