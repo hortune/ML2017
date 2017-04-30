@@ -5,6 +5,7 @@ config.gpu_options.per_process_gpu_memory_fraction = 1
 set_session(tf.Session(config=config))
 import numpy as np
 
+from keras.callbacks import Callback
 from numpy import genfromtxt
 from keras.models import Sequential
 from keras.layers.core import Dense, Dropout, Activation
@@ -13,7 +14,32 @@ from keras.optimizers import SGD, Adam
 from keras.utils import np_utils
 import keras.preprocessing.image as img
 #categorical_crossentropy
+class History(Callback):
+    def on_train_begin(self,logs={}):
+        self.tr_losses=[]
+        self.val_losses=[]
+        self.tr_accs=[]
+        self.val_accs=[]
 
+    def on_epoch_end(self,epoch,logs={}):
+        self.tr_losses.append(logs.get('loss'))
+        self.val_losses.append(logs.get('val_loss'))
+        self.tr_accs.append(logs.get('acc'))
+        self.val_accs.append(logs.get('val_acc'))
+
+def dump_history(logs):
+    with open('train_loss','a') as f:
+        for loss in logs.tr_losses:
+            f.write('{}\n'.format(loss))
+    with open('train_accuracy','a') as f:
+        for acc in logs.tr_accs:
+            f.write('{}\n'.format(acc))
+    with open('valid_loss','a') as f:
+        for loss in logs.val_losses:
+            f.write('{}\n'.format(loss))
+    with open('valid_accuracy','a') as f:
+        for acc in logs.val_accs:
+            f.write('{}\n'.format(acc))
 def load_raw_data(name):
         file_name = open(name,'r')
         x = []
@@ -98,10 +124,10 @@ datagen = img.ImageDataGenerator(
     height_shift_range=0.2
 )
 datagen.fit(x_train)
-model2.fit_generator(datagen.flow(x_train,y_train,batch_size=128),steps_per_epoch=len(x_train)/16,epochs=500,validation_data=(x_validate,y_validate))
-#model2.fit(x_train,y_train,batch_size=100,epochs=20,validation_split=0.1)
+history = model2.History()
+model2.fit_generator(datagen.flow(x_train,y_train,batch_size=128),steps_per_epoch=len(x_train)/16,epochs=5,validation_data=(x_validate,y_validate),callbacks=[history])
 
-
+dump_history(history)
 
 score = model2.evaluate(x_train,y_train)
 print '\nTrain Acc:', score[1]
