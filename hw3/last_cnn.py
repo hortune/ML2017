@@ -38,43 +38,10 @@ def load_data():
         x_train = x_train/255
         x_test = x_test/255
 	#x_test=np.random.normal(x_test)
-        return x_train,y_train,x_train[20000:],y_train[20000:],x_test
+        return x_train[:20000],y_train[:20000],x_train[20000:],y_train[20000:],x_test
 
 x_train,y_train,x_validate,y_validate,x_test=load_data()
 
-"""
-model2 = Sequential()
-model2.add(Conv2D(25,(3,3),input_shape=(48,48,1),padding="same"))
-
-model2.add(BatchNormalization())
-model2.add(MaxPooling2D((2,2)))
-#model2.add(AveragePooling2D((2,2)))
-
-model2.add(Dropout(0.3))
-
-model2.add(Conv2D(50,(3,3),padding="same"))
-model2.add(BatchNormalization())
-model2.add(MaxPooling2D((2,2)))
-#model2.add(AveragePooling2D((2,2)))
-model2.add(Dropout(0.3))
-
-model2.add(Conv2D(100,(3,3),padding="same"))
-model2.add(BatchNormalization())
-model2.add(MaxPooling2D((2,2)))
-#model2.add(AveragePooling2D((2,2)))
-model2.add(Dropout(0.5))
-
-model2.add(Conv2D(125,(3,3)))
-model2.add(BatchNormalization())
-model2.add(MaxPooling2D((2,2)))
-#model2.add(AveragePooling2D((2,2)))
-model2.add(Dropout(0.5))
-
-model2.add(Conv2D(250,(3,3)))
-model2.add(BatchNormalization())
-model2.add(MaxPooling2D((2,2)))
-#model2.add(AveragePooling2D((2,2)))model2.add(Dropout(0.5))
-"""
 model2 = Sequential()
 model2.add(Conv2D(25,(3,3),input_shape=(48,48,1)))
 model2.add(BatchNormalization())
@@ -131,7 +98,7 @@ datagen = img.ImageDataGenerator(
     height_shift_range=0.2
 )
 datagen.fit(x_train)
-model2.fit_generator(datagen.flow(x_train,y_train,batch_size=128),steps_per_epoch=len(x_train)/16,epochs=500)
+model2.fit_generator(datagen.flow(x_train,y_train,batch_size=128),steps_per_epoch=len(x_train)/16,epochs=500,validation_data=(x_validate,y_validate))
 #model2.fit(x_train,y_train,batch_size=100,epochs=20,validation_split=0.1)
 
 
