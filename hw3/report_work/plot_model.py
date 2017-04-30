@@ -4,7 +4,7 @@
 import os
 from termcolor import colored, cprint
 import argparse
-from keras.utils.visualize_util import plot
+from keras.utils import plot_model
 from keras.models import load_model
 
 base_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
@@ -25,4 +25,5 @@ def main():
     
     emotion_classifier = load_model('../last_model')
     emotion_classifier.summary()
-    plot(emotion_classifier,to_file='model.png')
+    plot_model(emotion_classifier,to_file='model.png')
+main()
