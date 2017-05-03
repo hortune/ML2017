@@ -1,4 +1,3 @@
-
 import tensorflow as tf
 from keras.backend.tensorflow_backend import set_session
 config = tf.ConfigProto()
@@ -83,7 +82,7 @@ model.summary()
 #exit()
 model.compile(loss='categorical_crossentropy',optimizer="adam",metrics=['accuracy'])
 history = History()
-model.fit(x_train,y_train,batch_size=100,epochs=20,validation_data=(x_validate,y_validate),callbacks=[history])
+model.fit(x_train,y_train,batch_size=100,epochs=100,validation_data=(x_validate,y_validate),callbacks=[history])
 dump_history(history)
 #model2.add(Dropout(0.25))
 #model2.add(Conv2D(64,(3,3)))
