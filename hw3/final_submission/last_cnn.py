@@ -126,7 +126,7 @@ datagen = img.ImageDataGenerator(
     height_shift_range=0.2
 )
 datagen.fit(x_train)
-model2.fit_generator(datagen.flow(x_train,y_train,batch_size=128),steps_per_epoch=len(x_train)/16,epochs=300)
+model2.fit_generator(datagen.flow(x_train,y_train,batch_size=128),steps_per_epoch=len(x_train)/16,epochs=120)
 
 score = model2.evaluate(x_train,y_train)
 print '\nTrain Acc:', score[1]
