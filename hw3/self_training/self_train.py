@@ -29,17 +29,18 @@ class History(Callback):
         self.tr_accs.append(logs.get('acc'))
         self.val_accs.append(logs.get('val_acc'))
 
+pref='100_epoch_no_val'
 def dump_history(logs):
-    with open('train_loss','a') as f:
+    with open(pref+'train_loss','a') as f:
         for loss in logs.tr_losses:
             f.write('{}\n'.format(loss))
-    with open('train_accuracy','a') as f:
+    with open(pref+'train_accuracy','a') as f:
         for acc in logs.tr_accs:
             f.write('{}\n'.format(acc))
-    with open('valid_loss','a') as f:
+    with open(pref+'valid_loss','a') as f:
         for loss in logs.val_losses:
             f.write('{}\n'.format(loss))
-    with open('valid_accuracy','a') as f:
+    with open(pref+'valid_accuracy','a') as f:
         for acc in logs.val_accs:
             f.write('{}\n'.format(acc))
 def load_raw_data(name):
@@ -59,7 +60,7 @@ def load_data():
         y_train = np_utils.to_categorical(y_train, 7)
         x_train = x_train/255
         x_test = x_test/255
-        return x_train[:20000],y_train[:20000],x_train[20000:],y_train[20000:],x_test
+        return x_train,y_train,x_train[20000:],y_train[20000:],x_test
 def make_model():
         model2 = Sequential()
         model2.add(Conv2D(25,(3,3),input_shape=(48,48,1)))
@@ -127,9 +128,9 @@ score = model2.evaluate(x_train,y_train)
 print '\nTrain Acc:', score[1]
 score = model2.evaluate(x_validate,y_validate)
 print '\nVal Acc:', score[1]
-model2.save('self_training_model')
+model2.save(pref+'self_training_model')
 
-file_name = open('last.csv','w')
+file_name = open(pref+'last.csv','w')
 res = model2.predict_classes(x_test)
 file_name.write("id,label\n")
 
