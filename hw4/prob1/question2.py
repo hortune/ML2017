@@ -45,7 +45,7 @@ for row in eigvec[:5].dot(image_data.T).T:
 fig = plt.figure(figsize=(12,12))
 for i in range(100):
     ax = fig.add_subplot(10,10,i+1)
-    ax.imshow((res_image[i]).reshape(64,64),cmap='gray',interpolation="nearest")
+    ax.imshow((res_image[i]+mean).reshape(64,64),cmap='gray',interpolation="nearest")
     plt.xticks(np.array([]))
     plt.yticks(np.array([]))
 fig.savefig("reconstruct.png")
