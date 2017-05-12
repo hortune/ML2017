@@ -29,7 +29,7 @@ eigvec = eigvec[idx]
 fig = plt.figure(figsize=(12,12))
 for i in range(100):
     ax = fig.add_subplot(10,10,i+1)
-    ax.imshow((image_data[i]).reshape(64,64),cmap='gray',interpolation="nearest")
+    ax.imshow((image_data[i]+mean).reshape(64,64),cmap='gray',interpolation="nearest")
     plt.xticks(np.array([]))
     plt.yticks(np.array([]))
 fig.savefig("origin.png")
