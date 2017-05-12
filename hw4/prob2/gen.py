@@ -15,7 +15,7 @@ trans_vec = pca.transform(vectors)
 # add tag 
 text = nltk.pos_tag(words)
 k_vec = []
-prohibit=set("|”“()‘`,.:;'!?\"")
+prohibit=set("’|”“()‘`,.:;\'!?\"")
 allow = set(["JJ","NNP","NN","NNS"])
 #plt.scatter(trans_vec[:,0],trans_vec[:,1])
 for word,vec in zip(text[:500],trans_vec[:500]):
