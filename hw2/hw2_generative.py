@@ -48,10 +48,10 @@ def load_training_data(filename,Y_filename):
     y = genfromtxt(Y_filename,delimiter=',')
     x = np.delete(x,0,0)
     mean = x.mean(axis=0,dtype=np.float64)
-    x -= mean
+    #x -= mean
     #sigma = np.sqrt((x**2).mean(axis=0,dtype=np.float64)/x.shape[0])
     std = x.std(axis=0)
-    x /= std
+    #x /= std
     true_data=[]
     false_data=[]
     for q,p in zip(x,y):
@@ -64,7 +64,7 @@ def load_training_data(filename,Y_filename):
 def load_testing_data(filename,mean,std):
     x = genfromtxt(filename,delimiter=',')
     x = np.delete(x,0,0)
-    x = (x-mean)/std
+    #x = (x-mean)/std
     return x
     
 if __name__=='__main__':

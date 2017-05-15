@@ -37,7 +37,7 @@ class Regression(object):
                 error+=1
         return error/x.shape[0]
 
-def shuffl(x,y,normal):
+def shuffl(x,y,mean,std):
     index_shuf = [i for i in range(x.shape[0])]
     shuffle(index_shuf)
     list1=[]
@@ -45,16 +45,16 @@ def shuffl(x,y,normal):
     for i in index_shuf:
         list1.append(x[i])
         list2.append(y[i])
-    return np.array(list1),np.array(list2),normal
+    return np.array(list1),np.array(list2),mean,std
 
 def sample(x,i,j):
-    x = np.hstack((x,x[:,i:j]**0.5))
+    #x = np.hstack((x,x[:,i:j]**0.5))
     x = np.hstack((x,x[:,i:j]**2))
     x = np.hstack((x,x[:,i:j]**3))
     x = np.hstack((x,x[:,i:j]**4))
     return x
 
-def load_training_data(filename,Y_filename,condition,s1,s2):
+def load_training_data(filename,Y_filename,s1,s2):
     x = genfromtxt(filename,delimiter=',')
     y = genfromtxt(Y_filename,delimiter=',')
     x = np.delete(x,0,0)
@@ -63,26 +63,31 @@ def load_training_data(filename,Y_filename,condition,s1,s2):
     temp_y = []
     
     x = np.delete(x,[1],1)
-    normal = x.max(axis=0)
-    x = x/normal
+    
+    std = x.max(axis=0)
+    x = x/std
+    
+    mean = x.mean(axis =0)
+    #std = x.std(axis = 0)
+    #x = (x - mean)/std
     x = sample(x,s1,s2)
     x = np.hstack((np.ones((x.shape[0],1),dtype=x.dtype),x))    
-    return shuffl(x,y,normal)
+    return shuffl(x,y,mean,std)
 
-def load_testing_data(filename,normal,s1,s2):
+def load_testing_data(filename,mean,std,s1,s2):
     x = genfromtxt(filename,delimiter=',')
     #x = np.hstack((np.ones((x.shape[0],1),dtype=x.dtype),x)) 
     x = np.delete(x,0,0)
     x = np.delete(x,[1],1)
-    x = x/normal
+    x /= std
     x = sample(x,s1,s2)
     x = np.hstack((np.ones((x.shape[0],1),dtype=x.dtype),x)) 
     return x
     
 if __name__=='__main__':
-    x,y,normal = load_training_data(sys.argv[1],sys.argv[2],[],0,6)
+    x,y,mean,std = load_training_data(sys.argv[1],sys.argv[2],0,6)
     k = Regression(0.5,30000).fit_hongyi(x[:],y[:],lam=0)
-    test = load_testing_data(sys.argv[3],normal,0,6)
+    test = load_testing_data(sys.argv[3],mean,std,0,6)
     with open(sys.argv[4],"w+") as fd:
         print("id,label",file=fd) 
         for i,j in enumerate(test):

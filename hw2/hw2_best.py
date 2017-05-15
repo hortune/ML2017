@@ -81,7 +81,7 @@ def load_testing_data(filename,normal,s1,s2):
     
 if __name__=='__main__':
     x,y,normal = load_training_data(sys.argv[1],sys.argv[2],[],0,6)
-    k = Regression(0.5,30000).fit_hongyi(x[:],y[:],lam=0)
+    k = Regression(0.5,30000).fit_hongyi(x[:],y[:],lam=100)
     test = load_testing_data(sys.argv[3],normal,0,6)
     with open(sys.argv[4],"w+") as fd:
         print("id,label",file=fd) 
