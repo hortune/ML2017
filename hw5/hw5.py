@@ -12,7 +12,7 @@ from keras.models import Sequential
 from keras.layers.core import Dense, Dropout, Activation
 from keras.layers import Conv2D, MaxPooling2D, Flatten,AveragePooling2D, BatchNormalization
 from keras.optimizers import SGD, Adam
-from keras.utils import np_utils
+from keras.utils import np_utils, to_categorical
 import keras.preprocessing.image as img
 #categorical_crossentropy
 from keras.preprocessing.text import Tokenizer
@@ -21,29 +21,49 @@ from keras.preprocessing.sequence import pad_sequences
 
 k = open('train_data.csv','r').readlines()
 x = []
-y = []
+labels_index = {}
+labels = []
 for string in k[1:]:
     pre = string.find('"')
     last = string.find('"',pre+1)
-    y.append(string[pre+1:last])
+    y_text  = string[pre+1:last].split()
+    label = []
+    for text in y_text:
+        if text not in labels_index:
+            lid = len(labels_index)
+            labels_index[text] = lid
+        label.append(labels_index[text])
+    labels.append(label)
+
     x.append(string[last+2:])
 
-tokenizer = Tokenizer(nb_words=100)
+tokenizer = Tokenizer(num_words=100)
 tokenizer.fit_on_texts(x)
 sequences = tokenizer.texts_to_sequences(x)
 
-"""
-x_train = x_train.reshape(x_train.shape[0],48,48,1)
-model2.compile(loss='categorical_crossentropy',optimizer="adam",metrics=['accuracy'])
+word_index = tokenizer.word_index
+max_num = 0
+data = pad_sequences(sequences, maxlen=175)
 
-datagen = img.ImageDataGenerator(
-	rotation_range = 3,
-	horizontal_flip=True,
-    width_shift_range=0.2,
-    height_shift_range=0.2
-)
-datagen.fit(x_train)
-model2.fit_generator(datagen.flow(x_train,y_train,batch_size=128),steps_per_epoch=len(x_train)/16,epochs=120)
+# For shuffle
+#labels = to_categorical(np.array(labels))
+new_labels = []
+for i in labels:
+    arr = np.zeros(len(labels_index))
+    arr[i]=1
+    new_labels.append(arr)
+labels = np.array(new_labels)
+indices = np.arange(data.shape[0])
+np.random.shuffle(indices)
+data = data[indices]
+labels = labels[indices]
 
-model2.save('cnn_model')
-"""
+nb_validation_samples = int(0.2*data.shape[0])
+
+x_train = data[:-nb_validation_samples]
+y_train = labels[:-nb_validation_samples]
+x_val = data[-nb_validation_samples:]
+y_val = labels[-nb_validation_samples:]
+
+
+
