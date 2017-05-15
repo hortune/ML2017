@@ -17,46 +17,65 @@ import keras.preprocessing.image as img
 #categorical_crossentropy
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
+from keras.layers.embeddings import Embedding
+def load_data():
+        k = open('train_data.csv','r').readlines()
+        x = []
+        labels_index = {}
+        labels = []
+        for string in k[1:]:
+            pre = string.find('"')
+            last = string.find('"',pre+1)
+            y_text  = string[pre+1:last].split()
+            label = []
+            for text in y_text:
+                if text not in labels_index:
+                    lid = len(labels_index)
+                    labels_index[text] = lid
+                label.append(labels_index[text])
+            labels.append(label)
+
+            x.append(string[last+2:])
+
+        tokenizer = Tokenizer(num_words=50000)
+        tokenizer.fit_on_texts(x)
+        sequences = tokenizer.texts_to_sequences(x)
+
+        word_index = tokenizer.word_index
+        max_num = 0
+        data = pad_sequences(sequences, maxlen=175)
+
+        # For shuffle
+        #labels = to_categorical(np.array(labels))
+        new_labels = []
+        for i in labels:
+            arr = np.zeros(len(labels_index))
+            arr[i]=1
+            new_labels.append(arr)
+        labels = np.array(new_labels)
+        indices = np.arange(data.shape[0])
+        np.random.shuffle(indices)
+        data = data[indices]
+        labels = labels[indices]
 
 
-k = open('train_data.csv','r').readlines()
-x = []
-labels_index = {}
-labels = []
-for string in k[1:]:
-    pre = string.find('"')
-    last = string.find('"',pre+1)
-    y_text  = string[pre+1:last].split()
-    label = []
-    for text in y_text:
-        if text not in labels_index:
-            lid = len(labels_index)
-            labels_index[text] = lid
-        label.append(labels_index[text])
-    labels.append(label)
+        """
+        nb_validation_samples = int(0.2*data.shape[0])
 
-    x.append(string[last+2:])
+        x_train = data[:-nb_validation_samples]
+        y_train = labels[:-nb_validation_samples]
+        x_val = data[-nb_validation_samples:]
+        y_val = labels[-nb_validation_samples:]
+        """
+        return data,labels
 
-tokenizer = Tokenizer(num_words=100)
-tokenizer.fit_on_texts(x)
-sequences = tokenizer.texts_to_sequences(x)
+x,labels = load_data()
 
-word_index = tokenizer.word_index
-max_num = 0
-data = pad_sequences(sequences, maxlen=175)
+model = Sequential()
+model.add(Embedding(50000,50,input_length=175))
+model.compile('rmsprop','mse'output_array = model.predict(x)
 
-# For shuffle
-#labels = to_categorical(np.array(labels))
-new_labels = []
-for i in labels:
-    arr = np.zeros(len(labels_index))
-    arr[i]=1
-    new_labels.append(arr)
-labels = np.array(new_labels)
-indices = np.arange(data.shape[0])
-np.random.shuffle(indices)
-data = data[indices]
-labels = labels[indices]
+data = model.predict(x)
 
 nb_validation_samples = int(0.2*data.shape[0])
 
@@ -65,5 +84,7 @@ y_train = labels[:-nb_validation_samples]
 x_val = data[-nb_validation_samples:]
 y_val = labels[-nb_validation_samples:]
 
+# Done Preprocessing
+# I may need to use word2vec
 
 
