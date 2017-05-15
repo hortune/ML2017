@@ -1,5 +1,6 @@
 import tensorflow as tf
 import sys
+import keras.backend as K
 from keras.backend.tensorflow_backend import set_session
 config = tf.ConfigProto()
 config.gpu_options.per_process_gpu_memory_fraction = 0.1
@@ -18,6 +19,15 @@ import keras.preprocessing.image as img
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 from keras.layers.embeddings import Embedding
+from keras.layers.recurrent import LSTM, GRU
+from keras.layers.wrappers import Bidirectional
+def f1score(y_true,y_pred):
+    num_tp = K.sum(y_true*y_pred)
+    num_fn = K.sum(y_true*(1.0-y_pred))
+    num_fp = K.sum((1.0-y_true)*y_pred)
+    num_tn = K.sum((1.0-y_true)*(1.0-y_pred))
+    f1 = 2.0*num_tp/(2.0*num_tp+num_fn+num_fp)
+    return f1
 def load_data():
         k = open('train_data.csv','r').readlines()
         x = []
@@ -37,13 +47,20 @@ def load_data():
 
             x.append(string[last+2:])
 
+        y = open('test_data.csv','r').readlines()
+        x_test = [] 
+        for string in y[1:]:
+            pre = string.find(',')
+            x_test.append(string[pre+1:])
+
         tokenizer = Tokenizer(num_words=50000)
         tokenizer.fit_on_texts(x)
         sequences = tokenizer.texts_to_sequences(x)
+        x_test = tokenizer.texts_to_sequences(x_test)
+        x_test = pad_sequences(x_test,padding='post',maxlen=300)
 
         word_index = tokenizer.word_index
-        max_num = 0
-        data = pad_sequences(sequences, maxlen=175)
+        data = pad_sequences(sequences, maxlen=300)
 
         # For shuffle
         #labels = to_categorical(np.array(labels))
@@ -58,33 +75,28 @@ def load_data():
         data = data[indices]
         labels = labels[indices]
 
-
-        """
-        nb_validation_samples = int(0.2*data.shape[0])
-
-        x_train = data[:-nb_validation_samples]
-        y_train = labels[:-nb_validation_samples]
-        x_val = data[-nb_validation_samples:]
-        y_val = labels[-nb_validation_samples:]
-        """
         return data,labels
 
 x,labels = load_data()
 
-model = Sequential()
-model.add(Embedding(50000,50,input_length=175))
-model.compile('rmsprop','mse'output_array = model.predict(x)
+m2 = Sequential()
+m2.add(Embedding(50000,100,input_length=300))
+m2.add(Bidirectional(GRU(70,return_sequences=True),input_shape=(300,100)))
+m2.add(Bidirectional(GRU(50)))
+m2.add(Dense(50,activation='linear'))
+m2.add(Dense(38,activation='sigmoid'))
 
-data = model.predict(x)
+sgd = SGD(lr=0.1,momentum=0.5,clipvalue=0.5)
+m2.summary()
+m2.compile(loss='binary_crossentropy',optimizer=sgd,metrics=[f1score])
 
-nb_validation_samples = int(0.2*data.shape[0])
-
-x_train = data[:-nb_validation_samples]
+#
+nb_validation_samples = int(0.2*x.shape[0])
+x_train = x[:-nb_validation_samples]
 y_train = labels[:-nb_validation_samples]
-x_val = data[-nb_validation_samples:]
+x_val = x[-nb_validation_samples:]
 y_val = labels[-nb_validation_samples:]
-
-# Done Preprocessing
-# I may need to use word2vec
-
+#
+m2.fit(x_train,y_train,epochs=20,batch_size=128,validation_data=(x_val,y_val))
+res = m2.predict(x_val)
 
