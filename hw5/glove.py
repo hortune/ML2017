@@ -1,3 +1,4 @@
+from gensim import corpora
 import tensorflow as tf
 import sys
 import keras.backend as K
@@ -64,9 +65,10 @@ def load_data():
         #data = pad_sequences(sequences,padding='post', maxlen=310)
         #
         stoplist = set('for a of the and to in'.split())
-i       raw_corpus = x
+        raw_corpus = x
         texts = text_to_word_sequence(x,lower=True,split=" ") 
-
+        texts = [[word for word in document if word not in stoplist] for document in texts]
+        
         #
         
         new_labels = []

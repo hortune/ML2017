@@ -29,67 +29,63 @@ def f1score(y_true,y_pred):
     num_tn = K.sum((1.0-y_true)*(1.0-y_pred))
     f1 = 2.0*num_tp/(2.0*num_tp+num_fn+num_fp)
     return f1
-#def load_data():
-k = open('train_data.csv','r').readlines()
-x = []
-labels_index = {}
-labels = []
-for string in k[1:]:
-    pre = string.find('"')
-    last = string.find('"',pre+1)
-    y_text  = string[pre+1:last].split()
-    label = []
-    for text in y_text:
-        if text not in labels_index:
-            lid = len(labels_index)
-            labels_index[text] = lid
-        label.append(labels_index[text])
-    labels.append(label)
+def load_data():
+    k = open('train_data.csv','r').readlines()
+    x = []
+    labels_index = {}
+    labels = []
+    for string in k[1:]:
+        pre = string.find('"')
+        last = string.find('"',pre+1)
+        y_text  = string[pre+1:last].split()
+        label = []
+        for text in y_text:
+            if text not in labels_index:
+                lid = len(labels_index)
+                labels_index[text] = lid
+            label.append(labels_index[text])
+        labels.append(label)
 
-    x.append(string[last+2:])
+        x.append(string[last+2:])
 
-y = open('test_data.csv','r').readlines()
-x_test = [] 
-for string in y[1:]:
-    pre = string.find(',')
-    x_test.append(string[pre+1:])
+    y = open('test_data.csv','r').readlines()
+    x_test = [] 
+    for string in y[1:]:
+        pre = string.find(',')
+        x_test.append(string[pre+1:])
 
-#x_test = tokenizer.texts_to_sequences(x_test)
-#x_test = pad_sequences(x_test,padding='post',maxlen=307)
+    #x_test = tokenizer.texts_to_sequences(x_test)
+    #x_test = pad_sequences(x_test,padding='post',maxlen=307)
 
-corpus = []
-for text in x:
-    corpus.append(text_to_word_sequence(text,lower=True,split=" "))
-model = gensim.models.Word2Vec(corpus,size=100,window=0,min_count=0,workers=0)
-x_res = []
+    corpus = []
+    for text in x:
+        corpus.append(text_to_word_sequence(text,lower=True,split=" "))
+    model = gensim.models.Word2Vec(corpus,size=100,window=0,min_count=0,workers=0)
+    x_res = []
 
-for text in corpus:
-    word_list= [] 
-    for i in text:
-        word_list.append(model[i])
-    x_res.append(word_list)
-
-
-"""       
-# For shuffle
-#labels = to_categorical(np.array(labels))
-new_labels = []
-for i in labels:
-    arr = np.zeros(len(labels_index))
-    arr[i]=1
-    new_labels.append(arr)
-labels = np.array(new_labels)
-indices = np.arange(data.shape[0])
-np.random.shuffle(indices)
-data = data[indices]
-labels = labels[indices]
-
-return data,labels
+    for text in corpus:
+        word_list= [] 
+        for i in text:
+            word_list.append(model[i])
+        x_res.append(word_list)
+    data = x_res 
+    # For shuffle
+    #labels = to_categorical(np.array(labels))
+    new_labels = []
+    for i in labels:
+        arr = np.zeros(len(labels_index))
+        arr[i]=1
+        new_labels.append(arr)
+    labels = np.array(new_labels)
+    indices = np.arange(data.shape[0])
+    np.random.shuffle(indices)
+    data = data[indices]
+    labels = labels[indices]
+    return data,labels
 #
 x,labels = load_data()
 
 m2 = Sequential()
-m2.add(Embedding(50000,100,input_length=300))
 m2.add(Bidirectional(GRU(70,return_sequences=True),input_shape=(300,100)))
 m2.add(Bidirectional(GRU(50)))
 m2.add(Dense(50,activation='linear'))
@@ -108,4 +104,3 @@ y_val = labels[-nb_validation_samples:]
 #
 m2.fit(x_train,y_train,epochs=20,batch_size=128,validation_data=(x_val,y_val))
 res = m2.predict(x_val)
-"""
