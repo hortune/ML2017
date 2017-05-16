@@ -63,12 +63,15 @@ def load_data():
     model = gensim.models.Word2Vec(corpus,size=100,window=0,min_count=0,workers=0)
     x_res = []
 
+    padding = np.zeros(100)
     for text in corpus:
         word_list= [] 
         for i in text:
             word_list.append(model[i])
+        for k in range(310-len(text)):
+            word_list.append(padding)
         x_res.append(word_list)
-    data = x_res 
+    data = np.array(x_res)
     # For shuffle
     #labels = to_categorical(np.array(labels))
     new_labels = []
@@ -77,6 +80,7 @@ def load_data():
         arr[i]=1
         new_labels.append(arr)
     labels = np.array(new_labels)
+
     indices = np.arange(data.shape[0])
     np.random.shuffle(indices)
     data = data[indices]
@@ -86,9 +90,11 @@ def load_data():
 x,labels = load_data()
 
 m2 = Sequential()
-m2.add(Bidirectional(GRU(70,return_sequences=True),input_shape=(300,100)))
-m2.add(Bidirectional(GRU(50)))
-m2.add(Dense(50,activation='linear'))
+m2.add(Bidirectional(GRU(100,return_sequences=True),input_shape=(310,100)))
+m2.add(Bidirectional(GRU(50,recurrent_dropout=0.2)))
+m2.add(Dropout(0.4))
+m2.add(Dense(689,activation='linear'))
+m2.add(Dropout(0.4))
 m2.add(Dense(38,activation='sigmoid'))
 
 sgd = SGD(lr=0.1,momentum=0.5,clipvalue=0.5)
