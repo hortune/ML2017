@@ -16,7 +16,7 @@ from keras.optimizers import SGD, Adam
 from keras.utils import np_utils, to_categorical
 import keras.preprocessing.image as img
 #categorical_crossentropy
-from keras.preprocessing.text import Tokenizer
+from keras.preprocessing.text import Tokenizer, text_to_word_sequence
 from keras.preprocessing.sequence import pad_sequences
 from keras.layers.embeddings import Embedding
 from keras.layers.recurrent import LSTM, GRU
@@ -54,17 +54,21 @@ def load_data():
             pre = string.find(',')
             x_test.append(string[pre+1:])
 
-        tokenizer = Tokenizer(num_words=50000)
-        tokenizer.fit_on_texts(x)
-        sequences = tokenizer.texts_to_sequences(x)
-        x_test = tokenizer.texts_to_sequences(x_test)
-        x_test = pad_sequences(x_test,padding='post',maxlen=310)
+        #tokenizer = Tokenizer(num_words=50000)
+        #tokenizer.fit_on_texts(x)
+        #sequences = tokenizer.texts_to_sequences(x)
+        #x_test = tokenizer.texts_to_sequences(x_test)
+        #x_test = pad_sequences(x_test,padding='post',maxlen=310)
 
-        word_index = tokenizer.word_index
-        data = pad_sequences(sequences,padding='post', maxlen=310)
+        #word_index = tokenizer.word_index
+        #data = pad_sequences(sequences,padding='post', maxlen=310)
+        #
+        stoplist = set('for a of the and to in'.split())
+i       raw_corpus = x
+        texts = text_to_word_sequence(x,lower=True,split=" ") 
 
-        # For shuffle
-        #labels = to_categorical(np.array(labels))
+        #
+        
         new_labels = []
         for i in labels:
             arr = np.zeros(len(labels_index))
