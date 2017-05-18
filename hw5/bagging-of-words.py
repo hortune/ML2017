@@ -13,6 +13,7 @@ def load_data(seperation=True):
     test_sets=[]
     for string in open('test_data.csv','r').readlines()[1:]:
         num,words=string.split(',',1)
+        words = " ".join([word for word in words.split() if "http" not in word])
         # Remove all garbage punctuation and turn lower split
         words = re.sub("[^a-zA-Z]"," ",words).lower().split()
         # Remove stop words
@@ -25,6 +26,7 @@ def load_data(seperation=True):
     
     for string in open('train_data.csv','r').readlines()[1:]:
         num,label,words= string.split(',',2)
+        words = " ".join([word for word in words.split() if "http" not in word])
         # Preprocess for label
         label_sets.append(label[1:-1].split())
 
@@ -46,9 +48,8 @@ def load_data(seperation=True):
 with open('data','wb') as f:
     pickle.dump(load_data(seperation=False),f)
 """
-
 f = open('data','rb')
-texts, labels,test_data = pickle.load(f)
+texts,labels,test_data = pickle.load(f)
 """
 f2 = open('data_sep','rb')
 t2, labels = pickle.load(f2)
@@ -70,17 +71,13 @@ from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.cross_validation import train_test_split
 from sklearn import metrics
 from sklearn.tree import DecisionTreeClassifier
-"""
-vectorizer = CountVectorizer(analyzer ="word", tokenizer = None, preprocessor = None, stop_words = None, max_features =5000)
-train_data_features = vectorizer.fit_transform(texts).toarray()
-"""
 mul = MultiLabelBinarizer()
 y_enc = mul.fit_transform(labels)
 par =mul.get_params()
 classifier = Pipeline([
     ('vectorizer',CountVectorizer(analyzer ="word", tokenizer = None, preprocessor = None, stop_words = None, max_features =20000)),
     ('tfidf',TfidfTransformer()),
-    ('clf',OneVsRestClassifier(LinearSVC(C=0.001,class_weight='balanced',random_state = 7122)))])
+    ('clf',OneVsRestClassifier(LinearSVC(C=0.05,class_weight='balanced',random_state = 7122)))])
 #train_x,test_x,train_y,test_y = train_test_split(texts,y_enc,test_size=0.2)
 classifier.fit(texts,y_enc)
 #classifier.fit(train_x,train_y)
@@ -89,8 +86,9 @@ predicted = classifier.predict(test_data)
 
 #my_metrics = metrics.classification_report(test_y,predicted)
 #print(my_metrics)
-
-with open('ans1.csv','w') as fd:
+with open('1e-1.csv','w') as fd:
     print("id,tags",file=fd)
     for index,text in enumerate(mul.inverse_transform(predicted)):
         print(index,",\""," ".join(text),"\"",sep='',file=fd)
+
+# C= 1e-2 Eout = 49

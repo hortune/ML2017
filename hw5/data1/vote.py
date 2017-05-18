@@ -13,8 +13,8 @@ with open('blend.csv','w') as fd:
         for i in res:
             if i not in ans and res.count(i)>=2:
                 ans.append(i)
-        if len(ans) == 0:
-            print(index,",\""," ".join(res),"\"",sep='',file=fd)
-        else:
-            print(index,",\""," ".join(ans),"\"",sep='',file=fd)
+        #if len(ans) == 0:
+        #    print(index,",\""," ".join(res),"\"",sep='',file=fd)
+        #else:
+        print(index,",\""," ".join(ans),"\"",sep='',file=fd)
         index+=1

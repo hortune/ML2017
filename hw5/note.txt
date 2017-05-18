@@ -1,0 +1,5 @@
+kaggle best
+zheng + deng + chen
+chen : 1 , svc C=0.05
+zheng : statistical method
+deng : i don't know
