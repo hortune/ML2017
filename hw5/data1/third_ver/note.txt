@@ -1,0 +1,5 @@
+classifier = Pipeline([
+    ('vectorizer',CountVectorizer(analyzer ="word", tokenizer = None, preprocessor = None, stop_words = None, max_features =30000)),
+    ('tfidf',TfidfTransformer()),
+    ('clf',OneVsRestClassifier(XGBClassifier(seed = 7122,scale_pos_weight=0.5)))])
+train_x,test_x,train_y,test_y = train_test_split(texts,y_enc,test_size=0.2)
