@@ -3,14 +3,16 @@ with open('blend.csv','w') as fd:
     b = open('1','r').readlines()
     c = open('2','r').readlines()
     d = open('3','r').readlines()
+    e = open('4','r').readlines()
     print('id,tags',file =fd)
     index = 0
-    for x,y,z,g in zip(a[1:],b[1:],c[1:],d[1:]):
+    for x,y,z,g,q in zip(a[1:],b[1:],c[1:],d[1:],e[1:]):
         x = x.replace('"','').split(',')[1].split()
         y = y.replace('"','').split(',')[1].split()
         z = z.replace('"','').split(',')[1].split()
         g = g.replace('"','').split(',')[1].split()
-        res = x+y+z
+        q = q.replace('"','').split(',')[1].split()
+        res = x+y+z+q
         ans = []
         for i in g:
             if i not in ans:
