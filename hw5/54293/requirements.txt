@@ -1,4 +1,8 @@
-sklearn
+pandas
+scipy
+numpy
+keras
 xgboost
 nltk
 h5py
+sklearn

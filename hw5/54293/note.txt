@@ -1,5 +1,0 @@
-4: 47090
-3: XGB Very bad but high precision, so use it as bias
-2: zheng's strange model
-1: linearSVC
-0: Den's statistical method
