@@ -11,7 +11,7 @@ def load_data(seperation=True):
     dic = {}
     dic1 = {}
     test_sets=[]
-    for string in open('test_data.csv','r').readlines()[1:]:
+    for string in open(sys.argv[2],'r').readlines()[1:]:
         num,words=string.split(',',1)
         words = " ".join([word for word in words.split() if "http" not in word])
         # Remove all garbage punctuation and turn lower split
@@ -24,7 +24,7 @@ def load_data(seperation=True):
         #test_sets.append( words if seperation else " ".join(words))            
         test_sets.append( words )            
     
-    for string in open('train_data.csv','r').readlines()[1:]:
+    for string in open(sys.argv[1],'r').readlines()[1:]:
         num,label,words= string.split(',',2)
         words = " ".join([word for word in words.split() if "http" not in word])
         # Preprocess for label
@@ -88,7 +88,7 @@ predicted = classifier.predict(test_data)
 
 #my_metrics = metrics.classification_report(test_y,predicted)
 #print(my_metrics)
-with open('XGB.csv','w') as fd:
+with open('3.csv','w') as fd:
     print("id,tags",file=fd)
     for index,text in enumerate(mul.inverse_transform(predicted)):
         print(index,",\""," ".join(text),"\"",sep='',file=fd)
