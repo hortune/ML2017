@@ -84,7 +84,7 @@ predicted = classifier.predict(test_data)
 
 #my_metrics = metrics.classification_report(test_y,predicted)
 #print(my_metrics)
-with open('gg.csv','w') as fd:
+with open('1','w') as fd:
     print("id,tags",file=fd)
     for index,text in enumerate(mul.inverse_transform(predicted)):
         print(index,",\""," ".join(text),"\"",sep='',file=fd)

@@ -138,7 +138,7 @@ out = np.zeros(ans.shape)
 out[ans>0.4] = 1
 
 count = 0
-f = open("out1.csv", "w")
+f = open("4.csv", "w")
 print('"id","tags"', file = f)
 for i in range(1234):
     print('"', i, '"', sep='', end = ',', file = f)
