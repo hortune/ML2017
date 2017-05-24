@@ -1,4 +1,5 @@
-with open('blend.csv','w') as fd:
+import sys
+with open(sys.argv[1],'w') as fd:
     a = open('0','r').readlines()
     b = open('1','r').readlines()
     c = open('2','r').readlines()
