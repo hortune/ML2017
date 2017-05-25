@@ -1,4 +1,5 @@
 import numpy as np
+import sys
 from keras.preprocessing.text import text_to_word_sequence, Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 from keras.layers.embeddings import Embedding
@@ -28,7 +29,7 @@ def load_data():
     label_list = []
     test_b_train = {}
     train_b_test = {}
-    for string in open('test_data.csv','r').readlines()[1:]:
+    for string in open(sys.argv[1],'r').readlines()[1:]:
         num,words=string.split(',',1)
         
         words = " ".join([word for word in words.split() if "http" not in word])
@@ -130,14 +131,13 @@ model.add( Activation('sigmoid') )
 
 model.compile( loss='categorical_crossentropy', optimizer=Adam(lr=0.001,decay=1e-6,clipvalue=0.5), metrics=[f1score] )
 model.fit(train_sequences, Y_data, batch_size=128, epochs = 28)
-#model.save("model.h5")
 
 ans = model.predict(test_sequences)
 out = np.zeros(ans.shape)
 out[ans>0.4] = 1
 
 count = 0
-f = open("4.csv", "w")
+f = open(sys.argv[2], "w")
 print('"id","tags"', file = f)
 for i in range(1234):
     print('"', i, '"', sep='', end = ',', file = f)

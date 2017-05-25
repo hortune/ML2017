@@ -57,7 +57,7 @@ for i in range(y_prob.shape[0]):
             tag += [int2tag[j]]
     y_tags += [tag]
 
-f = open('2', 'w')
+f = open(sys.argv[2], 'w')
 print('"id","tags"', file=f)
 for i, ts in enumerate(y_tags):
     print('"{}","'.format(i), end='', file=f)
