@@ -1,1 +1,1 @@
-python3 rnn.py $1 $2
+python3 2.py $1 $2
