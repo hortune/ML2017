@@ -7,13 +7,13 @@ from keras.layers import Dense, Dropout, Input, Flatten
 from keras.layers import Conv1D, MaxPooling1D, Embedding, LSTM, GRU
 from keras.models import Sequential, load_model
 from keras.models import Model
-
+"""
 import tensorflow as tf
 from keras.backend.tensorflow_backend import set_session
 config = tf.ConfigProto()
 config.gpu_options.per_process_gpu_memory_fraction = 0.1
 set_session(tf.Session(config=config))
-
+"""
 TEST_FILE = sys.argv[1]
 
 import pickle
