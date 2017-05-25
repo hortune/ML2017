@@ -14,29 +14,20 @@ def load_data(seperation=True):
     for string in open(sys.argv[2],'r').readlines()[1:]:
         num,words=string.split(',',1)
         words = " ".join([word for word in words.split() if "http" not in word])
-        # Remove all garbage punctuation and turn lower split
         words = re.sub("[^a-zA-Z]"," ",words).lower().split()
-        # Remove stop words
         words = [w for w in words if w not in stopwords.words("english")]
         for i in words:
             dic[i] = True
-        # Join back to string ?
-        #test_sets.append( words if seperation else " ".join(words))            
         test_sets.append( words )            
     
     for string in open(sys.argv[1],'r').readlines()[1:]:
         num,label,words= string.split(',',2)
         words = " ".join([word for word in words.split() if "http" not in word])
-        # Preprocess for label
         label_sets.append(label[1:-1].split())
-
-        # Remove all garbage punctuation and turn lower split
         words = re.sub("[^a-zA-Z]"," ",words).lower().split()
-        # Remove stop words
         for i in words:
             dic1[i] = True
         words = [w for w in words if w not in stopwords.words("english") and w in dic]
-        # Join back to string ?
         text_sets.append( words if seperation else " ".join(words))            
     new_test_sets = []
     for string in test_sets:
@@ -69,6 +60,7 @@ from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.cross_validation import train_test_split
 from sklearn import metrics
 from sklearn.tree import DecisionTreeClassifier
+"""
 mul = MultiLabelBinarizer()
 y_enc = mul.fit_transform(labels)
 par =mul.get_params()
@@ -76,14 +68,12 @@ classifier = Pipeline([
     ('vectorizer',CountVectorizer(analyzer ="word", tokenizer = None, preprocessor = None, stop_words = None, max_features =30000)),
     ('tfidf',TfidfTransformer()),
     ('clf',OneVsRestClassifier(LinearSVC(C=0.05,class_weight='balanced',random_state = 7122)))])
-#train_x,test_x,train_y,test_y = train_test_split(texts,y_enc,test_size=0.2)
-classifier.fit(texts,y_enc)
-#classifier.fit(train_x,train_y)
+"""
+f2 = open('1_data','rb')
+classifier, mul = pickle.load(f2)
+f2.close()
 predicted = classifier.predict(test_data)
-#predicted = classifier.predict(test_x)
 
-#my_metrics = metrics.classification_report(test_y,predicted)
-#print(my_metrics)
 with open('1','w') as fd:
     print("id,tags",file=fd)
     for index,text in enumerate(mul.inverse_transform(predicted)):

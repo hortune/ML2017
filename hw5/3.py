@@ -73,6 +73,7 @@ from sklearn import metrics
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import GradientBoostingClassifier
 from xgboost import XGBClassifier
+"""
 mul = MultiLabelBinarizer()
 y_enc = mul.fit_transform(labels)
 par =mul.get_params()
@@ -80,14 +81,14 @@ classifier = Pipeline([
     ('vectorizer',CountVectorizer(analyzer ="word", tokenizer = None, preprocessor = None, stop_words = None, max_features =30000)),
     ('tfidf',TfidfTransformer()),
     ('clf',OneVsRestClassifier(XGBClassifier(seed = 7122,scale_pos_weight=0.5)))])
-train_x,test_x,train_y,test_y = train_test_split(texts,y_enc,test_size=0.2)
-classifier.fit(texts,y_enc)
-#classifier.fit(train_x,train_y)
-predicted = classifier.predict(test_data)
-#predicted = classifier.predict(test_x)
+"""
 
-#my_metrics = metrics.classification_report(test_y,predicted)
-#print(my_metrics)
+f2 = open('3_data','rb')
+classifier, mul = pickle.load(f2)
+f2.close()
+
+#classifier.fit(texts,y_enc)
+predicted = classifier.predict(test_data)
 with open('3','w') as fd:
     print("id,tags",file=fd)
     for index,text in enumerate(mul.inverse_transform(predicted)):
