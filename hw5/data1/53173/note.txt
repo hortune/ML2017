@@ -1,3 +1,0 @@
-0 : den's statistical
-1 : LinearSVC
-2 : NN (Bidirectional) 54.xxx

@@ -1,4 +1,5 @@
 import sys, csv, string
+#  from IPython import embed
 import nltk
 import random
 import numpy as np
@@ -13,6 +14,7 @@ import math
 import copy
 seed = 7122#int(sys.argv[4])
 random.seed(seed)
+np.random.seed(seed)
 
 filtered = (
         ['\'s'] +
@@ -37,10 +39,10 @@ def loadData(path, test=False):
             f.readline()
             for line in f:
                 if test:
-                    id, corpus = line.split(',', 1)
+                    ig, corpus = line.split(',', 1)
                     tags = []
                 else:
-                    id, tags, corpus = line.split(',', 2)
+                    ig, tags, corpus = line.split(',', 2)
                     tags = tags.replace('"', '').split(' ')
                 corpus = urlRegex.sub('', corpus)
                 corpus = corpus.lower()
@@ -99,7 +101,7 @@ def loadData(path, test=False):
                     return word
                 corpus = list(map(preprocess, corpus))
                 #  corpus = list(set(corpus))
-                data.append([id, tags, corpus])
+                data.append([ig, tags, corpus])
         data = DataFrame(data, columns=['id', 'tags', 'corpus']).set_index('id')
         with open(path+'.pkl', 'wb') as f:
             pickle.dump(data, f)
@@ -117,20 +119,11 @@ def vectorize(train, test, mask):
     test['corpus'] = test['corpus'].apply(lambda x: [voc[e] for e in x if e in voc])
     return train, test, voclist
 
-
-np.random.seed(seed)
-
-train = loadData('../train_data.csv', test = True)
-print('training data loaded')
-test = loadData('../test_data.csv', test=True)
-print('testing data loaded')
-train = train.sample(frac=1, random_state=seed)
-valid = train[:1234]
-data = train[1234:]
-print('shuffled and split')
-data, test, voclist = vectorize(data, valid, test)
+train = loadData(sys.argv[1])
+test = loadData(sys.argv[2], test=True)
+data = train
+data, test, voclist = vectorize(data, test, test) #valid, test)
 veclen = len(voclist)
-print('vectorized')
 testid = list(test.index)
 
 voc = np.zeros(veclen)
@@ -156,7 +149,6 @@ for tags, corpus in data.values:
         else:
             freq[tag]['fp'] += c
             freq[tag]['tn'] += 1-c
-print('count')
 
 for tag in freq:
     v = freq[tag]
@@ -168,23 +160,13 @@ for tag in freq:
     fr = v['fp'] / (v['fp'] + v['tn'])
     ff = 2 * fp * fr / (fp + fr)
     ff = np.nan_to_num(ff)
-    #  v = (tf - ff) / 2
-    #  v = v / voc
-    #  #  v = (v['tp']) / voc / len(taglist)
-    #  v = np.nan_to_num(v)
-    #  freq[tag] = v
 
     dif = (voc - v['tp']) / len(taglist)
     dif += (voc == v['tp']) * (1/100)
     dif += (dif == 0) * 1
     freq[tag] = v['tp'] / dif
-    #  freq[tag] = np.log(freq[tag]+1)
-    #  freq[tag] = freq[tag] ** 0.3
     v = freq[tag]
     vf = sorted(enumerate(v), key=lambda x: x[1], reverse=True)
-    print(tag)
-    print(list(map(lambda x: [voclist[x[0]], x[1]], vf[:50])))
-print('freq')
 
 def normalize(freq, train, test):
     ctr = np.zeros(veclen)
@@ -200,13 +182,10 @@ def normalize(freq, train, test):
     for tag in freq:
         freq[tag] *= weight
 
-print('normalized')
-
-
 def score(data):
     ret = {}
     hit = 0
-    nothit = 0 + 1e-20
+    nothit = 0
     for tag in freq:
         b = []
         v = freq[tag]
@@ -225,8 +204,6 @@ def score(data):
     return ret, hit / (hit+nothit)
 baseline, _ = score(data)
 testScore, vHitRate = score(test)
-
-print("voc hit rate: %f" % (vHitRate))
 
 def f1(ans, pred):
     eq = (ans == pred)
@@ -266,6 +243,7 @@ for tag in freq:
     vx = testScore[tag][:, 1:]
     y = baseline[tag][:,0]
     vy = testScore[tag][:, 0]
+    #  m = GradientBoostingClassifier(max_depth=10)
     m.fit(x, y)
     pv = m.predict(vx)
     for i, e in zip(testid, pv):
@@ -275,17 +253,13 @@ for tag in freq:
     apy = apy + pv.tolist()
     acc = f1(y, m.predict(x))
     vacc = f1(vy, pv)
-    print ("%s train acc: %f, test acc: %f" % (tag, acc, vacc))
     baseline[tag] = m
-    if tag == 'SCIENCE-FICTION':
-        from IPython import embed
-        embed()
+
 apy = np.array(apy)
 avy = np.array(avy)
 af1 = f1(avy, apy)
-print ("f1: %f" %(af1))
 
-f = open('0.csv', 'w')
+f = open("0", 'w')
 f.write('"id","tags"\n')
 for tid in testid:
     f.write('"%s","%s"\n' % (tid, ' '.join(res[tid])))

@@ -11,7 +11,7 @@ def load_data(seperation=True):
     dic = {}
     dic1 = {}
     test_sets=[]
-    for string in open('test_data.csv','r').readlines()[1:]:
+    for string in open(sys.argv[2],'r').readlines()[1:]:
         num,words=string.split(',',1)
         words = " ".join([word for word in words.split() if "http" not in word])
         # Remove all garbage punctuation and turn lower split
@@ -24,7 +24,7 @@ def load_data(seperation=True):
         #test_sets.append( words if seperation else " ".join(words))            
         test_sets.append( words )            
     
-    for string in open('train_data.csv','r').readlines()[1:]:
+    for string in open(sys.argv[1],'r').readlines()[1:]:
         num,label,words= string.split(',',2)
         words = " ".join([word for word in words.split() if "http" not in word])
         # Preprocess for label
@@ -43,13 +43,11 @@ def load_data(seperation=True):
         words = [word for word in string if word in dic1]
         new_test_sets.append( words if seperation else " ".join(words))            
     return np.array(text_sets),np.array(label_sets),new_test_sets
-"""
-# Save as pickle object
 with open('data','wb') as f:
     pickle.dump(load_data(seperation=False),f)
-"""
-f = open('data','rb')
+f = open('data','rb') 
 texts,labels,test_data = pickle.load(f)
+#texts,labels,test_data = load_data(seperation=False)
 """
 f2 = open('data_sep','rb')
 t2, labels = pickle.load(f2)
@@ -77,19 +75,17 @@ par =mul.get_params()
 classifier = Pipeline([
     ('vectorizer',CountVectorizer(analyzer ="word", tokenizer = None, preprocessor = None, stop_words = None, max_features =30000)),
     ('tfidf',TfidfTransformer()),
-    ('clf',OneVsRestClassifier(LinearSVC(C=0.1,class_weight='balanced',random_state = 7122)))])
-train_x,test_x,train_y,test_y = train_test_split(texts,y_enc,test_size=0.2)
-#classifier.fit(texts,y_enc)
-classifier.fit(train_x,train_y)
-#predicted = classifier.predict(test_data)
-predicted = classifier.predict(test_x)
+    ('clf',OneVsRestClassifier(LinearSVC(C=0.05,class_weight='balanced',random_state = 7122)))])
+#train_x,test_x,train_y,test_y = train_test_split(texts,y_enc,test_size=0.2)
+classifier.fit(texts,y_enc)
+#classifier.fit(train_x,train_y)
+predicted = classifier.predict(test_data)
+#predicted = classifier.predict(test_x)
 
-my_metrics = metrics.classification_report(test_y,predicted)
-print(my_metrics)
-"""
-with open('1e-1.csv','w') as fd:
+#my_metrics = metrics.classification_report(test_y,predicted)
+#print(my_metrics)
+with open('1','w') as fd:
     print("id,tags",file=fd)
     for index,text in enumerate(mul.inverse_transform(predicted)):
         print(index,",\""," ".join(text),"\"",sep='',file=fd)
-"""
 # C= 1e-2 Eout = 49 random_state = 7122
