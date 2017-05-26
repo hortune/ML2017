@@ -26,5 +26,5 @@ nn = keras.layers.Dense(128, activation='relu')(nn)
 result = keras.layers.Dense(5, activation='softmax')(nn)
 
 model = kmodels.Model([movie_input, user_input], result)
-model.compile('adam', 'categorical_crossentropy'
+model.compile('adam', 'categorical_crossentropy')
 
