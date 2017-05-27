@@ -22,9 +22,6 @@ def load_data(upath, mpath, rpath, tpath):
     ratings.UserID = ratings.UserID.astype('category')
     ratings.MovieID = ratings.MovieID.astype('category')
     test_data = pd.read_csv(tpath)
-    test_data.UserID = test_data.UserID.astype('category')
-    test_data.MovieID = test_data.MovieID.astype('category')
-
     return users, movies, ratings, test_data
 
 import keras.models as kmodel
@@ -66,10 +63,11 @@ if __name__ == '__main__':
     #y = np.zeros((ratings.shape[0],5))
     y = ratings.Rating
     #y[np.arange(ratings.shape[0]), ratings.Rating -1] = 1
-    
-    m_test = test.MovieID.cat.codes.values
-    u_test = test.UserID.cat.codes.values
-    
+    embed()
+    m_test = test.MovieID
+    u_test = test.UserID
+   
+    embed()
     model = generate_model(4000, n_users)
 
     m_train,m_val,u_train,u_val,y_train,y_val = cross_validation.train_test_split(movieid,userid,y,test_size=0.5)
